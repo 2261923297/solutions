@@ -1,0 +1,10 @@
+#!/bin/bash
+    
+clear 
+    
+g++ Config.cc \
+    test_Config_white.cc \
+-o ../../bin/test_Config_white.exe
+    
+../../bin/test_Config_white.exe
+    

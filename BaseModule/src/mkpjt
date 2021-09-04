@@ -1,0 +1,5 @@
+#!/bin/bash 
+ 
+ clear 
+ AutoMake.exe -p /c/cpp/solutions/BaseModule/src/ $1 
+
