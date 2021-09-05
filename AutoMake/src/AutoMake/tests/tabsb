@@ -1,0 +1,11 @@
+#!/bin/bash
+
+clear
+
+g++ ../AutoMakeSrc.cc \
+	../../../File/TFile.cc \
+	../../../File/TWinFile.cc \
+		test_AutoMakeSrc_base.cc \
+-o ../bin/test_AutoMakeSrc.exe 
+
+../bin/test_AutoMakeSrc.exe

@@ -1,0 +1,11 @@
+#/bin/bash
+
+clear
+g++ File.cc \
+	test_File_base.cc \
+-o ../../bin/test_File_base
+
+chmod a+x ../../bin/test_File_base
+
+../../bin/test_File_base; 
+

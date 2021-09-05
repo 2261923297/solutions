@@ -1,0 +1,10 @@
+#!/bin/bash
+
+clear 
+
+g++ ams_test_white.cc \
+		../AutoMakeSolution.cc \
+		../../../File/TWinFile.cc \
+-o ../bin/ams_test.exe
+
+../bin/ams_test.exe

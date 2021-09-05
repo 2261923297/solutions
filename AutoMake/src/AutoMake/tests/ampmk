@@ -1,0 +1,11 @@
+#!/bin/bash
+
+clear 
+
+g++ amp_test_white.cc \
+		../AutoMakeProject.cc \
+		../../../File/TWinFile.cc \
+		../../../File/TFile.cc \
+-o ../bin/amp_test.exe
+
+../bin/amp_test.exe

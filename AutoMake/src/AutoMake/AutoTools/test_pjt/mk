@@ -1,0 +1,10 @@
+#!/bin/bash
+    
+clear 
+    
+g++ test_pjt.cc \
+    test_test_pjt_white.cc \
+-o ../../bin/test_test_pjt_white.exe
+    
+../../bin/test_test_pjt_white.exe
+    

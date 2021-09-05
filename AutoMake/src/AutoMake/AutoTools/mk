@@ -1,0 +1,13 @@
+#!/bin/bash
+
+clear 
+
+g++ AutoMake.cc \
+	../../../File/TFile.cc \
+	../../../File/TWinFile.cc \
+	../AutoMakeSolution.cc \
+	../AutoMakeProject.cc \
+	../AutoMakeSrc.cc \
+-o ../bin/AutoMake.exe
+
+../bin/AutoMake.exe 

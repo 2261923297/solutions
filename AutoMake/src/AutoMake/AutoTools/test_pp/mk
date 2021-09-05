@@ -1,0 +1,10 @@
+#!/bin/bash
+    
+clear 
+    
+g++ test_pp.cc \
+    test_test_pp_white.cc \
+-o ../../bin/test_test_pp_white.exe
+    
+../../bin/test_test_pp_white.exe
+    
