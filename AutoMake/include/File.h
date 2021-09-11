@@ -20,7 +20,7 @@
 	xx(Platform::Type::UNKNOWN) \
 //
 
-#include "../../include/EnumReflection.h"
+#include "EnumReflection.h"
 /*
 #define ENUM_CLASS_NAME FileType
 #define ENUM_NAME Type
@@ -54,16 +54,17 @@ public:
 	getPath() { return m_file_path; }
 
 	int 
-	exit() { return m_exit; }
+	exit() const  { return m_exit; }
+
 
 	int 
-	isDir() { return S_ISDIR(m_data.st_mode); }
+	isDir() const { return S_ISDIR(m_data.st_mode); }
 
 	int 
-	isReg() { return S_ISREG(m_data.st_mode); }
+	isReg() const { return S_ISREG(m_data.st_mode); }
 
 	size_t
-	size() { return m_data.st_size; }
+	size() const  { return m_data.st_size; }
 
 	void 
 	showData();
@@ -223,9 +224,6 @@ public:
 			if(d->exit() && d->isDir()) {
 				continue;
 			}
-			std::cout << "dir: " << dir_ss.str() 
-					<< " is not exit!" << std::endl;
-
 			break;
 		}
 		if(-1 == mkdir(dir_ss.str())) {

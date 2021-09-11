@@ -52,13 +52,23 @@ void test_entry() {
 	entry.close();
 	entry.resetData();   // ??????????file_size 刷新不了！！！！
 	entry.getData()->showData();
+
 	
+}
+
+void test_FileManager() {
+	tt::File::FileManager<tt::File::LinuxDirMaker> fm;
+	fm.mkdir("./test_dir");
+	fm.mkdirs("./111/222/333/444");
+
 }
 int main() {
 
 //	test_base();
 //	test_data();
-	test_entry();
+//	test_entry();
+	test_FileManager();	
+
 	return 0;
 
 }

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+clear
+
+g++ test_AutoMakePjt_base.cc \
+	AutoMakePjt.cc			 \
+	../../include/Log.cc	 \
+-o ../../bin/test_AutoMakePjt_base.o
+
+chmod a+x ../../bin/test_AutoMakePjt_base.o
+../../bin/test_AutoMakePjt_base.o
+

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+clear
+
+g++ test_AutoMakeSlt_base.cc \
+	AutoMakeSlt.cc			 \
+	../../include/Log.cc	 \
+-o ../../bin/test_AutoMakeSlt_base.o
+
+chmod a+x ../../bin/test_AutoMakeSlt_base.o
+../../bin/test_AutoMakeSlt_base.o
+

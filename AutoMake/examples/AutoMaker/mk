@@ -1,0 +1,14 @@
+#!/bin/bash
+
+clear
+
+g++ AutoMaker.cc  \
+		../../include/AutoMakeSrc.cc  \
+		../../include/File.cc  \
+-o ../../bin/AutoMaker.o
+
+chmod a+x ../../bin/AutoMaker.o
+
+../../bin/AutoMaker.o
+
+
