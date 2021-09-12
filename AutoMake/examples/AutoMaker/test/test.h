@@ -6,16 +6,16 @@
 
 namespace tt { 
 
-class Fiber{ 
+class test{ 
 public: 
-	using ptr = std::shared_ptr<Fiber>;
-	Fiber();
-	~Fiber();
+	using ptr = std::shared_ptr<test>;
+	test();
+	~test();
 
 
 protected:
 
-}; // Fiber
+}; // test
 
 } // namespcae tt 
 

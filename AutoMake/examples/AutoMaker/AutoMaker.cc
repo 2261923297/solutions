@@ -95,7 +95,7 @@ protected:
 void 
 mkpjt(const std::string& pjt_name, const std::string& pjt_dir = "./") {
 	std::cout << "make project: " << pjt_name
-			<< "\n     dir    : " << pjt_dir 
+			<< "\n     die    : " << pjt_dir 
 			<< std::endl;
 	AUTOMAKER::ptr am(new AUTOMAKER);
 	am->mkpjt(pjt_name, pjt_dir);

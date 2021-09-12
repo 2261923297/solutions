@@ -4,6 +4,7 @@ clear
     
 g++ Thread.cc \
     test_Thread_white.cc \
+-l pthread \
 -o ../../bin/test_Thread_white.exe
     
 ../../bin/test_Thread_white.exe

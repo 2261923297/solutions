@@ -14,11 +14,14 @@ ContextMaker::getContext() {
 void class_name::func_name()			\
 //
 xx(SrcContextMaker, makeContext) {
-	m_ss << "#include \"" << ContextMaker::GetProjectName() << ".h\" " << "\n\n"
+	m_ss 
+		<< "#include \"" << ContextMaker::GetProjectName() << ".h\" " << "\n\n"
+		<< "namespace tt {  \n\n"
 		<<  ContextMaker::GetProjectName() << "::" <<  ContextMaker::GetProjectName() << "() { " << "\n\n\n"
 		<< "}" << "\n\n"
 		<<  ContextMaker::GetProjectName() << "::~" <<  ContextMaker::GetProjectName() << "() {" << "\n\n\n"
 		<< "}" << "\n\n"
+		<< "} // namespace tt"
 		<< std::endl;
 }
 
@@ -27,6 +30,7 @@ xx(HeadContextMaker, makeContext) {
 		<< "#include <iostream>" << "\n"
 		<< "#include <memory>"    << "\n"
 		<< "#include <string>"	  << "\n\n"
+		<< "namespace tt { \n\n"
 		<< "class " <<  ContextMaker::GetProjectName() << "{ " << "\n"
 		<< "public: " << "\n"
 		<< "\tusing ptr = std::shared_ptr<" <<  ContextMaker::GetProjectName() << ">;" << "\n"
@@ -34,6 +38,7 @@ xx(HeadContextMaker, makeContext) {
 		<< "\t~" <<  ContextMaker::GetProjectName() << "();" << "\n\n\n" 
 		<< "protected:" << "\n\n"
 		<< "}; // " <<  ContextMaker::GetProjectName() << "\n\n"
+		<< "} // namespcae tt \n\n"
 		<< std::endl;
 }
 

@@ -1,5 +1,11 @@
 #!/bin/bash 
- 
+
  clear 
- AutoMake.exe -p /c/cpp/solutions/BaseModule/src/ $1 
+
+ ../../am -p ./ $1 
+
+ chmod a+x ./$1/mk.mk 
+
+ cd ./$1 
+ vim $1.h 
 
