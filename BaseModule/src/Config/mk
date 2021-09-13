@@ -1,10 +1,11 @@
 #!/bin/bash
-    
-clear 
-    
-g++ Config.cc \
-    test_Config_white.cc \
--o ../../bin/test_Config_white.exe
-    
-../../bin/test_Config_white.exe
-    
+
+g++ Config.cc   \
+    test_Config_func.cc  \
+-o ../../bin/test_Config_func.cc
+
+
+chmod a+x ../../bin/test_Config_func.cc 
+
+../../bin/test_Config_func.cc
+

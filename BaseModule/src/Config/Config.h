@@ -1,16 +1,22 @@
 #pragma once
-#include <iostream> 
+
+#include <iostream>
 #include <memory>
-  
-class Config {
+#include <string>
+
+namespace tt { 
+
+class Config{ 
 public: 
-    typedef std::shared_ptr<Config> ptr; 
-    
-    Config(); 
-    virtual ~Config();
-    
-    
-private: 
-    
+	using ptr = std::shared_ptr<Config>;
+	Config();
+	~Config();
+
+
+protected:
+
 }; // Config
-    
+
+} // namespcae tt 
+
+

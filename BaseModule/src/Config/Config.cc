@@ -1,11 +1,15 @@
-#include "Config.h"
-#include <string>
-    
-Config::Config() {
-    
+#include "Config.h" 
+
+namespace tt {  
+
+Config::Config() { 
+
+
 }
-    
+
 Config::~Config() {
-    
+
+
 }
-    
+
+} // namespace tt

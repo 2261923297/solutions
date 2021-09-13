@@ -9,8 +9,6 @@ test_assert() {
 }
 void test_base() {
 
-
-
 }
 
 int
