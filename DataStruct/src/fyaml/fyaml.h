@@ -26,17 +26,25 @@ namespace tt {
 class fyaml_data{ 
 public: 
 	using ptr = std::shared_ptr<fyaml>;
+	using struct_t = std::map<std::string, fyaml_data::ptr>;
+
 	fyaml_data();
-	~fyaml_data();
+	virtual ~fyaml_data();
+	
+	void            add_son(const std::string& name, fyaml_data::ptr addr) { m_son_nodes.insert({ name, addr}); }
+	fyaml_data::ptr get_son(const std::string& name) { return m_son_nodes[name]; }
+
+	fyaml_data::ptr operator[](const std::string& name) { return get_son(name); }
+
 	
 	int isMap() { return m_type == fyaml_type::type::MAP; } // split is :\n && only opne fyaml in lower level 
 	int isQueue() { return m_type == fyaml_type::type::QUEUE; } // split is : [args] || more fyaml int same level
 	int isScala() { return m_type == fyaml_type::type::SCALA; } // no:
 	int isError() { return m_type == fyaml_type::type::ERROR: } // split is :
 
-	void 
-	load(const std::vector<std::pair<int, std::string> >& strs, 
-		 int beg, int end);
+	void
+	load(const std::vecto<int>& levels, const std::vector<std::string>a& strs, 
+		 int beg, int nLine);
 
 
 protected:
@@ -47,14 +55,13 @@ protected:
 	std::vector<std::string> m_sons;
 	unsigned int m_location[2];
 
+	struct_t m_son_nodes;
 
 }; // fyaml
 
 class fyaml_struct {
 public:
 	using ptr = std::shared_ptr<fyaml_struct>;
-	using link_t = std::list<fyaml_data::ptr>;
-
 	fyaml_struct() { }
 	virtual fyaml_struct() { }
 
@@ -62,7 +69,6 @@ public:
 protected:
 	fyaml_data m_data;
 
-	link_t m_son_nodes;
 
 }; // fyaml_struct
 
