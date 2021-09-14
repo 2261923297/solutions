@@ -2,7 +2,7 @@
 
  clear 
 
- ../../AutoMaker.o -p ./ $1 
+ ../../am -p ./ $1 
 
  chmod a+x ./$1/mk.mk 
 

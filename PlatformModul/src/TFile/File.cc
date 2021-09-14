@@ -69,7 +69,6 @@ Path::getdirs(std::vector<std::string>& dirs, const std::string& path)  {
 		name_beg = name_end + 1;
 		dirs.push_back(dirname);
 	}
-	std::cout << "\n";
 }
 
 void 
@@ -190,36 +189,13 @@ Entry::init(const std::string& path) {
 
 int
 LinuxDirMaker::mkdir(const std::string& path, mode_t mode) {
-	std::cout << "LinuxDirMaker->mkdir: " << path << std::endl;
+//	std::cout << "LinuxDirMaker->mkdir: " << path << std::endl;
 	int ans = ::mkdir(path.c_str(), mode);
 	if(ans == -1) {
-		perror("LinuxDirMaker->mkdir");
+		perror("[error] > LinuxDirMaker::mkdir");
 	}
 	return ans;
 }
-
-/*
- 
-	Path::ptr p(new Path(path));
-	Data::ptr d(new Data(path));
-	std::string abs_path = p->absolute();
-
-	std::vector<std::string> p_dirs = p->dirs();
-	std::stringstream dir_ss;
-	Data d;
-	for(auto p_dir : p_dirs) {
-		dir_ss << "/" << p_dir;
-		d.reset(dir_ss.str());
-		if(d.exit() && d.isDir())	
-			continue;
-		} else {
-			
-		}
-	}
-
- *
- *
- * */
 
 
 

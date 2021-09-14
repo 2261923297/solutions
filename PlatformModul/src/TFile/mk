@@ -1,8 +1,10 @@
 #/bin/bash
 
 clear
-g++ File.cc \
-	test_File_base.cc \
+# g++ File.cc \
+	
+g++	test_File_base.cc \
+	-l file \
 -o ../../bin/test_File_base
 
 chmod a+x ../../bin/test_File_base
