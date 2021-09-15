@@ -3,6 +3,7 @@
 #include <iostream>
 #include <list>
 #include <memory>
+#include <map>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -25,7 +26,7 @@ namespace tt {
 
 class fyaml_data{ 
 public: 
-	using ptr = std::shared_ptr<fyaml>;
+	using ptr = std::shared_ptr<fyaml_data>;
 	using struct_t = std::map<std::string, fyaml_data::ptr>;
 
 	fyaml_data();
@@ -40,13 +41,20 @@ public:
 	int isMap() { return m_type == fyaml_type::type::MAP; } // split is :\n && only opne fyaml in lower level 
 	int isQueue() { return m_type == fyaml_type::type::QUEUE; } // split is : [args] || more fyaml int same level
 	int isScala() { return m_type == fyaml_type::type::SCALA; } // no:
-	int isError() { return m_type == fyaml_type::type::ERROR: } // split is :
+	int isError() { return m_type == fyaml_type::type::ERROR; } // split is :
+
+	fyaml_type::type type() const { return m_type; }
+	const std::string& name() const { return m_name; }
+	unsigned int level() const { return m_level;}
+	unsigned int location_begin() const { return m_location[0]; }
+	unsigned int location_line_num() const { return m_location[1]; }
 
 	void
-	load(const std::vecto<int>& levels, const std::vector<std::string>a& strs, 
+	load(const std::vector<int>& levels, const std::vector<std::string>& strs, 
 		 int beg, int nLine);
 
 
+	void show_data();
 protected:
 	std::string m_name;
 	unsigned int m_level;
@@ -63,7 +71,7 @@ class fyaml_struct {
 public:
 	using ptr = std::shared_ptr<fyaml_struct>;
 	fyaml_struct() { }
-	virtual fyaml_struct() { }
+	virtual ~fyaml_struct() { }
 
 
 protected:

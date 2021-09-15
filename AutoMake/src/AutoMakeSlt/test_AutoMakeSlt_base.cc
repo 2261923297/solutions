@@ -1,5 +1,21 @@
 #include "AutoMakeSlt.h"
 
+#define ENUM_CLASS_NAME test
+#define ENUM_NAME color
+#define ENUM_BODY ENUM_MESSAGE(color, RED, BLACK, YELLOW)
+#define ENUM_VALUES \
+	xx(test::color::RED) \
+	xx(test::color::BLACK) \
+	xx(test::color::YELLOW) \
+//
+#include "../../include/EnumReflection.h"
+
+/*
+class test {
+public:
+	enum color { RED, BLACK, YELLOW };
+};
+*/
 void 
 test_base() {
 	AutoMakeSlt::ptr ams(new AutoMakeSlt);
@@ -22,8 +38,10 @@ test_base() {
 }
 
 int main() {
-	std::cout << "Hello! test AutoMakeSlt" << std::endl;
-	test_base();
+//	std::cout << "Hello! test AutoMakeSlt" << std::endl;
+	test::color e =  test::color::BLACK;
+	std::cout << e << std::endl;
+//	test_base();
 
 	return 0;
 }
