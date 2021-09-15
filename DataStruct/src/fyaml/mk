@@ -1,0 +1,12 @@
+#!/bin/bash
+
+clear
+
+g++ fyaml.cc \
+	test_fyaml_func.cc \
+-l file \
+-o ../../bin/test_fyaml_base.o
+
+chmod a+x ../../bin/test_fyaml_base.o
+
+../../bin/test_fyaml_base.o

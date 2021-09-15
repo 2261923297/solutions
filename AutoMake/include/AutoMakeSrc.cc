@@ -57,11 +57,12 @@ xx(MakeContextMaker, makeContext) {
 
 	std::string test_file_name = "test_" + ContextMaker::GetProjectName() + "_func.cc";
 	m_ss << "#!/bin/bash" << "\n\n"
+		<< "clear \n\n"
 		<< "g++ " << ContextMaker::GetProjectName() << ".cc   \\" << "\n"
 		<< "    " << test_file_name << "  \\" << "\n"
-		<< "-o " << s_binDir << test_file_name << "\n\n\n"
-		<< "chmod a+x " << s_binDir << test_file_name << " \n\n"
-		<< s_binDir << test_file_name << "\n"
+		<< "-o " << s_binDir << test_file_name << ".o\n\n\n"
+		<< "chmod a+x " << s_binDir << test_file_name << ".o \n\n"
+		<< s_binDir << test_file_name << ".o\n"
 		<< std::endl;
 }
 

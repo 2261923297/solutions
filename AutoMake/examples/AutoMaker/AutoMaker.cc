@@ -60,7 +60,7 @@ public:
 		
 		std::string header = pjt_name + ".h";
 		std::string source = pjt_name + ".cc";
-		std::string mk = "mk.mk";
+		std::string mk = "mk";
 		std::string test = std::string("test_") + pjt_name + std::string("_func.cc");
 		std::string context = "";
 #undef xx

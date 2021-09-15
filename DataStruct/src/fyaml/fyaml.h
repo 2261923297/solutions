@@ -32,7 +32,7 @@ public:
 	fyaml_data();
 	virtual ~fyaml_data();
 	
-	void            add_son(const std::string& name, fyaml_data::ptr addr) { m_son_nodes.insert({ name, addr}); }
+	void            add_son(const std::string& name, fyaml_data::ptr& addr) { m_son_nodes.insert({ name, addr}); }
 	fyaml_data::ptr get_son(const std::string& name) { return m_son_nodes[name]; }
 
 	fyaml_data::ptr operator[](const std::string& name) { return get_son(name); }
@@ -54,7 +54,17 @@ public:
 		 int beg, int nLine);
 
 
+
 	void show_data();
+
+protected:
+	fyaml_data(const std::string& name, int location, int level);
+
+	void load_line(const std::string& line_str, int location, int level);
+	void load_scala(const std::string& name, int location, int level);
+public:
+	static const std::string& s_name_follows;
+
 protected:
 	std::string m_name;
 	unsigned int m_level;

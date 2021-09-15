@@ -1,0 +1,13 @@
+#!/bin/bash
+
+clear 
+
+g++ test.cc   \
+    test_test_func.cc  \
+-o ../../bin/test_test_func.cc.o
+
+
+chmod a+x ../../bin/test_test_func.cc.o 
+
+../../bin/test_test_func.cc.o
+

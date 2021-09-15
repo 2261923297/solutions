@@ -8,7 +8,7 @@ void fyaml_from_file(const std::string& file_name, std::vector<int>& levels, std
 	const size_t buffer_size = 2048;
 	char buffer[buffer_size + 1] = { 0 };
 	fentry->read(buffer, buffer_size);
-	std::cout << buffer << std::endl;
+//	std::cout << buffer << std::endl;
 
 	// split line
 	int line = 0;
@@ -29,6 +29,16 @@ void fyaml_from_file(const std::string& file_name, std::vector<int>& levels, std
 	}
 	
 }
+
+void 
+make_fyamls(tt::fyaml_data::ptr& fyaml_root, 
+		std::vector<int>& levels, 
+		std::vector<std::string>& strs) {
+	int max_level = levels[0];
+	for(auto level : levels) 
+	  { max_level = max_level > level ? max_level : level; }	
+
+}
 void
 test_base() { 
 	tt::fyaml_data::ptr fd (new tt::fyaml_data);
@@ -45,10 +55,17 @@ test_base() {
 	fd->load(levels, strs, 0, 6);
 	fd->show_data();
 	std::cout << "type: " << fd->type() << std::endl;
-
-	fd.reset(new tt::fyaml_data);
-	fd->load(levels, strs, 6, 4);
-	fd->show_data();
+#undef xx
+#define xx(beg, nLine) \
+	fd.reset(new tt::fyaml_data); \
+	fd->load(levels, strs, beg, nLine); \
+	fd->show_data();\
+	//
+	xx(6, 4)
+	xx(10, 1)
+	xx(11, 1)
+	xx(12, 1)
+#undef xx // xx(beg, nLine)
 }
 
 
