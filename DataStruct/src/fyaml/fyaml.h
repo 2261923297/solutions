@@ -90,6 +90,16 @@ protected:
 
 }; // fyaml_struct
 
+class fyaml_level_map {
+public:
+	fyaml_level_map(const int max_level) { m_mapper.resize(max_level + 1); }
+	fyaml_data::ptr& find(int level, const std::string& name); 
+	void add(int level, fyaml_data::ptr& fd);
+
+protected:
+	std::vector<std::map<std::string, fyaml_data::ptr> > m_mapper;
+}; // class fyaml_level_map
+
 } // namespcae tt 
 
 

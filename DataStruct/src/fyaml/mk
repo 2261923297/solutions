@@ -9,4 +9,4 @@ g++ fyaml.cc \
 
 chmod a+x ../../bin/test_fyaml_base.o
 
-../../bin/test_fyaml_base.o
+../../bin/test_fyaml_base.o ./fyaml.conf

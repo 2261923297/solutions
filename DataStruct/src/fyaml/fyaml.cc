@@ -30,34 +30,31 @@ fyaml_data::load_line(const std::string& line_str, int location, int level) {
 	m_location[1] = 1;
 
 	int sp_pos = line_str.find(":");
-	if(sp_pos == std::string::npos) {
+	if(sp_pos == std::string::npos) { // SCALA
 		sp_pos = line_str.find_first_not_of(s_name_follows);
 		m_type = fyaml_type::type::SCALA;
 	} else {
 		int que_pos = line_str.find("[");
-		if(std::string::npos == que_pos) {
+		if(std::string::npos == que_pos) {		// MAP
 			m_type = fyaml_type::type::MAP;
 			int sca_beg = 0, sca_end = 0;
 			sca_beg = line_str.find_first_of(s_name_follows, sp_pos);
 			sca_end = line_str.find_first_not_of(s_name_follows, sca_beg);
 			std::string sca_name = line_str.substr(sca_beg, sca_end - sca_beg);
 			m_sons.push_back(sca_name);
-			fyaml_data::ptr son(new fyaml_data(sca_name, location, level));
+			fyaml_data::ptr son(new fyaml_data(sca_name, location, level + 1));
 			add_son(sca_name, son);
-		} else {
+		} else {								// MAP
 			m_type = fyaml_type::type::QUEUE;
 			size_t beg = que_pos + 2, end = line_str.find_first_not_of(s_name_follows, beg);
-			std::cout << "beg: " << beg << ", end: " << end	<< std::endl;
 			std::string que_name = "";
 			for(;;) {
-				if(',' == line_str[end]) {
+				if(',' == line_str[end]) {		// SCALA
 					end = line_str.find_first_not_of(s_name_follows, beg);
-					std::cout << "beg: " << beg << ", end: " << end	<< std::endl;
 
 					que_name = line_str.substr(beg, end - beg);
-					std::cout << "que_name: " << que_name << std::endl;
 					m_sons.push_back(que_name);
-					fyaml_data::ptr son(new fyaml_data(que_name, location, level));
+					fyaml_data::ptr son(new fyaml_data(que_name, location, level + 1));
 					add_son(que_name, son);
 					beg = end + 2;
 				} else {
@@ -128,7 +125,18 @@ fyaml_data::show_data() {
 //		son.second->show_data();
 	}
 	std::cout << ss.str();
+}	
+
+fyaml_data::ptr& 
+fyaml_level_map::find(int level, const std::string& name) {
+	return m_mapper[level][name];
 }
+
+void 
+fyaml_level_map::add(int level, fyaml_data::ptr& fd) {
+	m_mapper[level][fd->name()] = fd;
+}
+
 /*
 fyaml::fyaml() { 
 
