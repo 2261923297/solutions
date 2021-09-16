@@ -1,5 +1,5 @@
 #include "fyaml.h" 
-
+#include "../../include/File.h"
 namespace tt {  
 
 const std::string& 
@@ -10,7 +10,7 @@ fyaml_data::fyaml_data() {
 	m_name = "root";
 	m_location[0] = m_location[1] = 0;
 	m_type = fyaml_type::type::ERROR;
-	m_level = -1;
+	m_level = 0;
 }
 
 fyaml_data::~fyaml_data() { }
@@ -135,6 +135,69 @@ fyaml_level_map::find(int level, const std::string& name) {
 void 
 fyaml_level_map::add(int level, fyaml_data::ptr& fd) {
 	m_mapper[level][fd->name()] = fd;
+}
+
+fyaml_level_map::fyaml_level_map(const int max_level)  { 
+	m_mapper.resize(max_level + 2); 
+	fyaml_data::ptr addeder = fyaml_data::ptr(new fyaml_data);
+	add(0, addeder);	
+}
+
+void 
+fyaml_loader::load_from_file(const std::string& file_name)  {
+	tt::File::Entry::ptr fentry(new tt::File::Entry(file_name));	
+	fentry->reopen();
+	const size_t buffer_size = 2048;
+	char buffer[buffer_size + 1] = { 0 };
+	fentry->read(buffer, buffer_size);
+//	std::cout << buffer << std::endl;
+
+	// split line
+	int line = 0;
+	m_levels.push_back(0);
+	m_confs.push_back("");
+	for(int i = 0; i < buffer_size; i++) {
+		if(buffer[i] == '\t') {
+			m_levels[line]++;
+			continue;
+		} else if(buffer[i] == '\n') {
+			if(buffer[i - 1] == '\n') {continue; }
+			line ++;
+			m_levels.push_back(0);
+			m_confs.push_back("");
+			continue;
+		}
+		m_confs[line] += buffer[i];
+	}
+	int max_level = m_levels[0];
+	for(size_t i = 0; i < m_levels.size(); i++) {
+		m_levels[i]++;
+		max_level = max_level > m_levels[i] ? max_level : m_levels[i];
+	}
+	std::cout << "max_level = " << max_level << std::endl;
+	m_mapper.resize(max_level + 1);
+	fyaml_data::ptr root(new fyaml_data);
+	add(root);
+}
+
+void
+fyaml_loader::parent(fyaml_data::ptr& ans, int line) {
+	int cur_level = m_levels[line];
+	for(int i = line - 1; i >= 0; i--) {
+		if(m_levels[i] > cur_level) {
+			std::string name = m_confs[i].substr(0, m_confs[i].find(":"));
+			std::cout << "line: " << line << "parent_name: " << name << std::endl;
+			
+			ans = m_mapper[cur_level - 1][name];
+			return;
+		}
+	}
+	ans.reset();
+}
+void 
+fyaml_loader::auto_make_data() {
+		
+	
 }
 
 /*

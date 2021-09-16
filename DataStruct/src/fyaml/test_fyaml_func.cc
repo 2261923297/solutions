@@ -1,35 +1,6 @@
 #include "fyaml.h" 
 #include "../../include/File.h"
 
-
-void fyaml_from_file(const std::string& file_name, std::vector<int>& levels, std::vector<std::string>& strs) {
-	tt::File::Entry::ptr fentry(new tt::File::Entry(file_name));	
-	fentry->reopen();
-	const size_t buffer_size = 2048;
-	char buffer[buffer_size + 1] = { 0 };
-	fentry->read(buffer, buffer_size);
-//	std::cout << buffer << std::endl;
-
-	// split line
-	int line = 0;
-	levels.push_back(0);
-	strs.push_back("");
-	for(int i = 0; i < buffer_size; i++) {
-		if(buffer[i] == '\t') {
-			levels[line]++;
-			continue;
-		} else if(buffer[i] == '\n') {
-			if(buffer[i - 1] == '\n') {continue; }
-			line ++;
-			levels.push_back(0);
-			strs.push_back("");
-			continue;
-		}
-		strs[line] += buffer[i];
-	}
-	
-}
-
 void 
 make_fyamls(tt::fyaml_data::ptr& fyaml_root, 
 		std::vector<int>& levels, 
@@ -50,10 +21,12 @@ void
 test_base(const std::string& file_name) { 
 	tt::fyaml_data::ptr fd (new tt::fyaml_data);
 	std::cout << fyaml_type::type::MAP << std::endl;
-	std::vector<int> levels;
-	std::vector<std::string> strs;
 
-	fyaml_from_file(file_name, levels, strs);
+	tt::fyaml_loader::ptr fl(new tt::fyaml_loader);
+	fl->load_from_file(file_name);
+	const std::vector<int>& levels = fl->levels();
+	const std::vector<std::string>& strs = fl->confs();
+
 	int line = levels.size();
 	for(int i = 0; i < line; i++) {
 		std::cout << i << ": " << levels[i] << ", " << strs[i] << std::endl;
@@ -71,10 +44,10 @@ test_base(const std::string& file_name) {
 	//
 	xx(fds[0], 6, 4)
 
-	xx(fds[1], 10, 1)
-	xx(fds[2], 11, 1)
-	xx(fds[3], 12, 1)
-	xx(fds[4], 0, 6)
+//	xx(fds[1], 10, 1)
+//	xx(fds[2], 11, 1)
+//	xx(fds[3], 12, 1)
+//	xx(fds[4], 0, 6)
 
 #undef xx // xx(beg, nLine)
 

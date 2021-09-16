@@ -50,7 +50,8 @@ public:
 	unsigned int location_line_num() const { return m_location[1]; }
 
 	void
-	load(const std::vector<int>& levels, const std::vector<std::string>& strs, 
+	load(const std::vector<int>& levels, 
+		 const std::vector<std::string>& strs,  
 		 int beg, int nLine);
 
 
@@ -77,28 +78,41 @@ protected:
 
 }; // fyaml
 
-class fyaml_struct {
-public:
-	using ptr = std::shared_ptr<fyaml_struct>;
-	fyaml_struct() { }
-	virtual ~fyaml_struct() { }
-
-
-protected:
-	fyaml_data m_data;
-
-
-}; // fyaml_struct
-
 class fyaml_level_map {
 public:
-	fyaml_level_map(const int max_level) { m_mapper.resize(max_level + 1); }
-	fyaml_data::ptr& find(int level, const std::string& name); 
-	void add(int level, fyaml_data::ptr& fd);
+	fyaml_level_map(int max_level);
+	fyaml_data::ptr& find(int level, const std::string& name);
 
+	void add(int level, fyaml_data::ptr& fd) ;
 protected:
+
 	std::vector<std::map<std::string, fyaml_data::ptr> > m_mapper;
 }; // class fyaml_level_map
+
+class fyaml_loader {
+public:
+	using ptr = std::shared_ptr<fyaml_loader>;
+	void load_from_file(const std::string& file_path);
+	void auto_make_data();
+
+	const std::vector<int>& levels() const { return m_levels;}
+	const std::vector<std::string>& confs() const { return m_confs; }
+
+	fyaml_data::ptr& find(int level, const std::string& name)
+ 	  { return m_mapper[level][name]; }
+
+	void add(fyaml_data::ptr& fd) 
+	  { m_mapper[fd->level()][fd->name()] = fd; }
+
+	fyaml_data::ptr& root() { return m_mapper[0]["root"]; }	
+protected:
+	void parent(fyaml_data::ptr& ans, int line) ;
+
+protected:
+	std::vector<int> m_levels;
+	std::vector<std::string> m_confs;
+	std::vector<std::map<std::string, fyaml_data::ptr> > m_mapper;
+}; // fyaml_loader
 
 } // namespcae tt 
 
