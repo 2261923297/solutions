@@ -127,22 +127,6 @@ fyaml_data::show_data() {
 	std::cout << ss.str();
 }	
 
-fyaml_data::ptr& 
-fyaml_level_map::find(int level, const std::string& name) {
-	return m_mapper[level][name];
-}
-
-void 
-fyaml_level_map::add(int level, fyaml_data::ptr& fd) {
-	m_mapper[level][fd->name()] = fd;
-}
-
-fyaml_level_map::fyaml_level_map(const int max_level)  { 
-	m_mapper.resize(max_level + 2); 
-	fyaml_data::ptr addeder = fyaml_data::ptr(new fyaml_data);
-	add(0, addeder);	
-}
-
 void 
 fyaml_loader::load_from_file(const std::string& file_name)  {
 	tt::File::Entry::ptr fentry(new tt::File::Entry(file_name));	
@@ -196,8 +180,18 @@ fyaml_loader::parent(fyaml_data::ptr& ans, int line) {
 }
 void 
 fyaml_loader::auto_make_data() {
-		
-	
+	for(int i = 0; i < m_levels.size(); i++) {
+		int level = m_levels[i];
+		fyaml_data::ptr& d_parent = (*((m_mapper[level - 1].end())--)).second;
+		for(int j = i; j < m_levels.size(); j++) {
+			if(m_levels[j] >= level) {
+
+				fyaml_data::ptr new_data(new fyaml_data);
+				new_data->load(m_levels, m_confs, i, j - i);
+				d_parent->add_son(new_data->name(), new_data);
+			}
+		}
+	}		
 }
 
 /*

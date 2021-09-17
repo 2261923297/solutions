@@ -24,6 +24,7 @@ test_base(const std::string& file_name) {
 
 	tt::fyaml_loader::ptr fl(new tt::fyaml_loader);
 	fl->load_from_file(file_name);
+
 	const std::vector<int>& levels = fl->levels();
 	const std::vector<std::string>& strs = fl->confs();
 
@@ -33,13 +34,12 @@ test_base(const std::string& file_name) {
 	}
 
 	tt::fyaml_data::ptr fds[5] = { nullptr };
-	tt::fyaml_level_map* mapper(new tt::fyaml_level_map(3));
 #undef xx
 #define xx(fd, beg, nLine) \
 	fd.reset(new tt::fyaml_data); \
 	fd->load(levels, strs, beg, nLine); \
-	mapper->add(fd->level(), fd); \
-	mapper->find(fds[0]->level(), fd->name())->show_data(); \
+	fl->add(fd); \
+	fl->find(fds[0]->level(), fd->name())->show_data(); \
 	fd->show_data();\
 	//
 	xx(fds[0], 6, 4)
@@ -50,8 +50,8 @@ test_base(const std::string& file_name) {
 //	xx(fds[4], 0, 6)
 
 #undef xx // xx(beg, nLine)
-
-	
+	fl->root()->show_data();
+		
 }
 
 void test_mapper( ) {

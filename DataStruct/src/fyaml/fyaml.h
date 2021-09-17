@@ -78,17 +78,6 @@ protected:
 
 }; // fyaml
 
-class fyaml_level_map {
-public:
-	fyaml_level_map(int max_level);
-	fyaml_data::ptr& find(int level, const std::string& name);
-
-	void add(int level, fyaml_data::ptr& fd) ;
-protected:
-
-	std::vector<std::map<std::string, fyaml_data::ptr> > m_mapper;
-}; // class fyaml_level_map
-
 class fyaml_loader {
 public:
 	using ptr = std::shared_ptr<fyaml_loader>;
