@@ -3,7 +3,7 @@
 namespace tt {  
 
 const std::string& 
-fyaml_data::s_name_follows = "abcdefghijklmnopqrstuvwxyz_";
+fyaml_data::s_name_follows = "abcdefghijklmnopqrstuvwxyz_1234567890";
 
 
 fyaml_data::fyaml_data() {
@@ -38,18 +38,24 @@ fyaml_data::load_line(const std::string& line_str, int location, int level) {
 		if(std::string::npos == que_pos) {		// MAP
 			m_type = fyaml_type::type::MAP;
 			int sca_beg = 0, sca_end = 0;
-			sca_beg = line_str.find_first_of(s_name_follows, sp_pos);
-			sca_end = line_str.find_first_not_of(s_name_follows, sca_beg);
+			sca_beg = line_str.find("\"", sp_pos);
+			if(sca_beg != std::string::npos) {
+				sca_beg;
+				sca_end = line_str.find("\"", sca_beg + 1) + 1;
+			} else {
+				sca_beg = line_str.find_first_of(s_name_follows, sp_pos);
+				sca_end = line_str.find_first_not_of(s_name_follows, sca_beg);
+			}
 			std::string sca_name = line_str.substr(sca_beg, sca_end - sca_beg);
 			m_sons.push_back(sca_name);
 			fyaml_data::ptr son(new fyaml_data(sca_name, location, level + 1));
 			add_son(sca_name, son);
-		} else {								// MAP
+		} else {								// QUEUE
 			m_type = fyaml_type::type::QUEUE;
 			size_t beg = que_pos + 2, end = line_str.find_first_not_of(s_name_follows, beg);
 			std::string que_name = "";
 			for(;;) {
-				if(',' == line_str[end]) {		// SCALA
+				if(',' == line_str[end]) {			// SCALA
 					end = line_str.find_first_not_of(s_name_follows, beg);
 
 					que_name = line_str.substr(beg, end - beg);
@@ -106,15 +112,52 @@ fyaml_data::load(const std::vector<int>& levels, const std::vector<std::string>&
 
 }
 
+void
+fyaml_data::to_string(std::stringstream& ss) {
+	if(m_level >= 1) {
+		for(int i = 1; i < m_level; i++) {
+			ss << "\t";
+		}
+		if(m_type == fyaml_type::type::SCALA) {
+			ss << m_name << std::endl;
+			return;
+		} else { 
+			ss << m_name <<": ";
+			if(m_location[1] == 1) { 
+				if(m_type == fyaml_type::type::MAP)
+					ss << m_sons[0];
+				else {
+					ss << "[ ";
+					for(int i = 0; i < m_sons.size(); i++) {
+						ss << m_sons[i];
+						if(i == m_sons.size() - 1) {
+							ss << " ]";
+						} else {
+							ss << ", ";
+						}
+					}
+				}
+				ss << std::endl;
+				return;
+			}
+			ss << std::endl;
+		}
+	}
+	
+	for(auto son : m_sons) {
+		(*this)[son]->to_string(ss);
+	}
+}
+
 void 
-fyaml_data::show_data() {
+fyaml_data::show_data() const {
 	std::stringstream ss;
 	ss  << "-fyaml_data:"
-		<< "\n\tname:       " << m_name
-		<< "\n\tlevel:      " << m_level
-		<< "\n\ttype:       " << m_type
-		<< "\n\tlocation: [ " << m_location[0] << ", " << m_location[1] << " ]"
-		<< "\n\tsons:     [ "; 
+		<< "\tname:       " << m_name
+		<< "\tlevel:      " << m_level
+		<< "\ttype:       " << m_type
+		<< "\tlocation: [ " << m_location[0] << ", " << m_location[1] << " ]"
+		<< "\tsons:     [ "; 
 	std::string str = "";
 	for(int i = 0; i < m_sons.size(); i++) {
 		str = i == m_sons.size() - 1 ? m_sons[i] : (m_sons[i] + ", ");
@@ -173,6 +216,7 @@ fyaml_loader::parent(fyaml_data::ptr& ans, int line) {
 			std::cout << "line: " << line << "parent_name: " << name << std::endl;
 			
 			ans = m_mapper[cur_level - 1][name];
+			m_max_level = cur_level;
 			return;
 		}
 	}
@@ -180,15 +224,25 @@ fyaml_loader::parent(fyaml_data::ptr& ans, int line) {
 }
 void 
 fyaml_loader::auto_make_data() {
+	std::vector<fyaml_data::ptr> level_cur_new;
+	level_cur_new.resize(m_mapper.size());
+	level_cur_new[0] = root();
+
 	for(int i = 0; i < m_levels.size(); i++) {
 		int level = m_levels[i];
-		fyaml_data::ptr& d_parent = (*((m_mapper[level - 1].end())--)).second;
-		for(int j = i; j < m_levels.size(); j++) {
-			if(m_levels[j] >= level) {
-
+		for(int j = i + 1; j < m_levels.size(); j++) {
+			if(m_levels[j] <= level) {
+				
 				fyaml_data::ptr new_data(new fyaml_data);
 				new_data->load(m_levels, m_confs, i, j - i);
-				d_parent->add_son(new_data->name(), new_data);
+
+				level_cur_new[new_data->level() - 1]
+					->add_son(new_data->name(), new_data);
+				if(new_data->level() == 1) {
+					root()->add_son(new_data->name());
+				}
+				level_cur_new[new_data->level()] = new_data;
+				break;
 			}
 		}
 	}		

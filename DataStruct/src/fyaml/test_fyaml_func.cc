@@ -20,7 +20,6 @@ mkdata(const std::vector<int>& levels, const std::vector<std::string>& strs, int
 void
 test_base(const std::string& file_name) { 
 	tt::fyaml_data::ptr fd (new tt::fyaml_data);
-	std::cout << fyaml_type::type::MAP << std::endl;
 
 	tt::fyaml_loader::ptr fl(new tt::fyaml_loader);
 	fl->load_from_file(file_name);
@@ -32,7 +31,6 @@ test_base(const std::string& file_name) {
 	for(int i = 0; i < line; i++) {
 		std::cout << i << ": " << levels[i] << ", " << strs[i] << std::endl;
 	}
-
 	tt::fyaml_data::ptr fds[5] = { nullptr };
 #undef xx
 #define xx(fd, beg, nLine) \
@@ -43,25 +41,53 @@ test_base(const std::string& file_name) {
 	fd->show_data();\
 	//
 	xx(fds[0], 6, 4)
-
 //	xx(fds[1], 10, 1)
 //	xx(fds[2], 11, 1)
 //	xx(fds[3], 12, 1)
 //	xx(fds[4], 0, 6)
-
 #undef xx // xx(beg, nLine)
-	fl->root()->show_data();
-		
+	fl->root()->show_data();		
+
 }
 
-void test_mapper( ) {
+void test_loader(const std::string& file_name) {
+	tt::fyaml_loader::ptr fl(new tt::fyaml_loader);
+	fl->load_from_file(file_name);
+	tt::fyaml_data::ptr& root = fl->root();	
+	
+	const std::vector<int>& levels = fl->levels();
+	const std::vector<std::string>& confs = fl->confs();
+	std::cout << "----------every_line-------" << std::endl;
+	for(int i = 0; i < levels.size(); i++) {
+		std::cout << "i = " << i 
+			<< ", level: " << levels[i] 
+			<< ", " << confs[i] 
+			<< std::endl;
+	}
+	
+	std::cout << "-----------to_string--------" << std::endl;
+	fl->auto_make_data();
+//	root->show_data();
+	std::stringstream ss;
+	root->to_string(ss);
 
-
+	std::cout << ss.str() << std::endl;
+	
+//	for()
+	
 }
 int
 main(int argc, char** argv) {
 	std::cout << "Hello, fyaml!" << std::endl;
-	test_base(argv[1]);
-
+//	test_base(argv[1]);
+	test_loader(argv[1]);
 	return 0; 
 }
+
+
+
+
+
+
+
+

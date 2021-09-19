@@ -32,32 +32,42 @@ public:
 	fyaml_data();
 	virtual ~fyaml_data();
 	
-	void            add_son(const std::string& name, fyaml_data::ptr& addr) { m_son_nodes.insert({ name, addr}); }
-	fyaml_data::ptr get_son(const std::string& name) { return m_son_nodes[name]; }
+	void           
+	add_son(const std::string& name, fyaml_data::ptr& addr)		 
+	  { m_son_nodes.insert({ name, addr}); }
+	fyaml_data::ptr 
+	get_son(const std::string& name) 
+	  { return m_son_nodes[name]; }
 
-	fyaml_data::ptr operator[](const std::string& name) { return get_son(name); }
+	fyaml_data::ptr 
+	operator[](const std::string& name) 
+	  { return get_son(name); }
 
 	
-	int isMap() { return m_type == fyaml_type::type::MAP; } // split is :\n && only opne fyaml in lower level 
-	int isQueue() { return m_type == fyaml_type::type::QUEUE; } // split is : [args] || more fyaml int same level
+	// split is :\n && only opne fyaml in lower level 
+	int isMap() { return m_type == fyaml_type::type::MAP; } 
+	// split is : [args] || more fyaml int same level
+	int isQueue() { return m_type == fyaml_type::type::QUEUE; } 
 	int isScala() { return m_type == fyaml_type::type::SCALA; } // no:
-	int isError() { return m_type == fyaml_type::type::ERROR; } // split is :
+	// split is :
+	int isError() { return m_type == fyaml_type::type::ERROR; } 
 
 	fyaml_type::type type() const { return m_type; }
 	const std::string& name() const { return m_name; }
 	unsigned int level() const { return m_level;}
-	unsigned int location_begin() const { return m_location[0]; }
-	unsigned int location_line_num() const { return m_location[1]; }
+	unsigned int line() const { return m_location[0]; } // line_number
+	unsigned int len() const { return m_location[1]; }  // n_lines
+	const std::vector<std::string>& sons() const { return m_sons; }
 
 	void
 	load(const std::vector<int>& levels, 
 		 const std::vector<std::string>& strs,  
 		 int beg, int nLine);
 
+	void add_son(const std::string& name) { m_sons.push_back(name); }
+	void show_data() const;
 
-
-	void show_data();
-
+	void to_string(std::stringstream& ss) ;
 protected:
 	fyaml_data(const std::string& name, int location, int level);
 
@@ -98,6 +108,7 @@ protected:
 	void parent(fyaml_data::ptr& ans, int line) ;
 
 protected:
+	int m_max_level;
 	std::vector<int> m_levels;
 	std::vector<std::string> m_confs;
 	std::vector<std::map<std::string, fyaml_data::ptr> > m_mapper;
