@@ -60,6 +60,7 @@ ttlog::Formatter::initFormatItem() {
 		, xx(fn, FileNameFormatItem)
 		, xx(s,  StringFormatItem)
 		, xx(ln, LineFormatItem)
+		, xx(lm, LoggerNameFormatItem)
 	};
 #undef xx
 	std::string pure_format = "";
@@ -110,6 +111,10 @@ ttlog::Formatter::initFormatItem() {
 
 void
 ttlog::Logger::log(ttlog::Event::ptr e)  {
+	if(m_appandars.size() == 0) {
+		m_def_appandar << m_def_formatter->generate(e);
+		return;
+	}
 	for(auto appanda : m_appandars) {
 		if(appanda->getLevel() >= e->getLevel()) {
 			appanda << m_def_formatter->generate(e);

@@ -2,9 +2,9 @@
 
 clear
 
-g++ fyaml.cc \
+g++ \
 	test_fyaml_func.cc \
--l file \
+-l fyaml \
 -o ../../bin/test_fyaml_base.o
 
 chmod a+x ../../bin/test_fyaml_base.o
