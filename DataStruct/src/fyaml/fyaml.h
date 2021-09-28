@@ -21,6 +21,7 @@
 	xx(fyaml_type::type::ERROR) \
 //
 
+
 #include "../../include/EnumReflection.h"
 namespace tt { 
 
@@ -31,7 +32,7 @@ public:
 
 	fyaml_data();
 	virtual ~fyaml_data();
-	
+
 	void           
 	add_son(const std::string& name, fyaml_data::ptr& addr)		 
 	  { m_son_nodes.insert({ name, addr}); }

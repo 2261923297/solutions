@@ -20,7 +20,7 @@
 	xx(Platform::Type::UNKNOWN) \
 //
 
-#include "../../include/EnumReflection.h"
+#include "EnumReflection.h"
 /*
 #define ENUM_CLASS_NAME FileType
 #define ENUM_NAME Type

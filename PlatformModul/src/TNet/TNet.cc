@@ -1,13 +1,20 @@
 #include "TNet.h" 
+namespace tt {
+namespace net {
 
-TNet::TNet() { 
-
-
-}
-
-TNet::~TNet() {
+Socket::Socket() { 
 
 
 }
 
+Socket::~Socket() {
+
+
+}
+
+
+
+} // namespace net
+
+} // namespace tt
 

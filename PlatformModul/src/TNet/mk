@@ -1,6 +1,9 @@
 #!/bin/bash
 
+clear
+
 g++ TNet.cc   \
+-l file -l log \
     test_TNet_func.cc  \
 -o ../../bin/test_TNet_func.cc
 

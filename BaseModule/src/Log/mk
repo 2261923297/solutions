@@ -2,7 +2,7 @@
     
 clear 
     
-g++  Log.cc\
+g++  -l log\
     test_Log_white.cc \
 -o ../../bin/test_Log_white.exe
     

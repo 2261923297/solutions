@@ -23,7 +23,7 @@
 	xx(LogLevel::Level::INFO)  \
 	xx(LogLevel::Level::DEBUG) \
 //
-#include "../../include/EnumReflection.h"
+#include "EnumReflection.h"
 
 #define LOG_LEVEL(logger, level) \
 	ttlog::EventVar(logger, ttlog::Event::ptr(new ttlog::Event(logger->getName(), level, __LINE__, __FILE__))).getSS()

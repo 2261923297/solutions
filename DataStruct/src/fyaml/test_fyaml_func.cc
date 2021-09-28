@@ -1,4 +1,5 @@
 #include "fyaml.h" 
+#include "data.h"
 #include "../../include/File.h"
 
 void 
@@ -76,9 +77,11 @@ void test_loader(const std::string& file_name) {
 //	for()
 	
 }
-int
+
+void test_data() {
+	tt::fyaml::data::ptr d(new tt::fyaml::data("test", ));
+}
 main(int argc, char** argv) {
-	std::cout << "Hello, fyaml!" << std::endl;
 //	test_base(argv[1]);
 	test_loader(argv[1]);
 	return 0; 
