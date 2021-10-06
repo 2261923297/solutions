@@ -6,7 +6,7 @@ mkpjt_context="
 #!/bin/bash \n\n
 clear \n\n
 ../../am -p ./ \$1  \n\n
-chmod a+x ./\$1/mk.mk \n\n
+chmod a+x ./\$1/mk \n\n
 cd ./\$1  \n
 vim \$1.h \n
 "

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+clear 
+
+g++ structrue.cc   \
+    test_structrue_func.cc  \
+-o ../../bin/test_structrue_func.cc.o
+
+
+chmod a+x ../../bin/test_structrue_func.cc.o 
+
+../../bin/test_structrue_func.cc.o
+

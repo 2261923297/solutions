@@ -1,0 +1,13 @@
+#!/bin/bash
+
+clear 
+
+g++ node.cc   \
+    test_node_func.cc  \
+-o ../../bin/test_node_func.cc.o
+
+
+chmod a+x ../../bin/test_node_func.cc.o 
+
+../../bin/test_node_func.cc.o
+

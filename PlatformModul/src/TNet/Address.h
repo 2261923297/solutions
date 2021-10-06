@@ -17,8 +17,6 @@ public:
 	using ptr = std::shared_ptr<Address>;
 	Address();
 	virtual Address();
-
-
 protected:
 
 } // class Address;

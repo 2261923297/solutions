@@ -1,4 +1,4 @@
-#pragma
+
 
 #include <iostream>
 #include <string>
@@ -7,6 +7,7 @@
 #include "../../include/AutoMakeSrc.h"
 #include "../../include/AutoMakePjt.h"
 #include "../../include/File.h"
+
 template<class DirMaker = AutoMakeSlt, class FileMaker = AutoMakePjt, class SrcMaker = AutoMakeSrc>
 class AutoMaker {
 public:
