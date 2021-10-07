@@ -2,14 +2,6 @@
 
 namespace tt {  
 
-structrue::structrue() { 
 
-
-}
-
-structrue::~structrue() {
-
-
-}
 
 } // namespace tt

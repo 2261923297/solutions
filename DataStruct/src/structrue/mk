@@ -4,6 +4,8 @@ clear
 
 g++ structrue.cc   \
     test_structrue_func.cc  \
+-l log  \
+-std=c++17  \
 -o ../../bin/test_structrue_func.cc.o
 
 
