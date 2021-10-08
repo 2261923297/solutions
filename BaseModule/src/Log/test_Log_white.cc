@@ -16,9 +16,11 @@ void test_in_run() {
 
 
 
+
 }
     
 int main() {
+	TT_DEBUG << "test tt_debug";
     std::cout << "Hello, test Log base!" << std::endl;
     test_shared_ptr();
     

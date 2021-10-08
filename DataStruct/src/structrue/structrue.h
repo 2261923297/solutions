@@ -39,19 +39,19 @@ public:
 		m_strategies = ContainerStrategies::ptr(new ContainerStrategies); 
 	}	
 	
-	virtual ~structrue() { clean(); }
+	virtual ~structrue() { }
 
 	virtual bool
-	add(const node_t& val, int pos) = 0;
+	add(const node_t& val, size_t pos) = 0;
 
 	virtual bool
 	del(node_p pos) = 0;
 
 	virtual node_p
-	find(const node_t& val, int pos) = 0;
+	find(const node_t& val, size_t pos) = 0;
 
 	virtual node_p
-	find(const node_t& val, int pos, int len) = 0;
+	find(const node_t& val, size_t pos, int len) = 0;
 
 	virtual bool
 	alter(node_p pos, const node_t& to_val) = 0;
@@ -62,7 +62,7 @@ public:
 	bool reset(size_t size)  { 
 		clean();
 		if(size != 0) {
-			m_head = (node_p*)malloc(sizeof(node_t) * size);
+			m_head = (node_p)malloc(sizeof(node_t) * size);
 			if(m_head == nullptr) {
 				TT_DEBUG << "no memory! "; 
 				return false;
@@ -94,29 +94,33 @@ public:
 	using node_r = NodeType&;
 
 
-	Array(size_t size = 0) : structrue<node_t>(size) {}
-	~Array() { free(this->m_head); }
-	bool add(const node_t& val, int pos) override {
-		if(this->m_capacity - this->m_size > 0) {
-			this->m_head[this->m_size] = val;
-			this->m_size++;
-			return true;
+	Array(size_t size = 8) : structrue<node_t>(size) {}
+	virtual ~Array() { clean(); }
+	bool add(const node_t& val, size_t pos = -1) override {
+		if(pos == -1) { pos = this->m_size; }
+		if(this->m_capacity - this->m_size <= 0) {
+			if(false == relloc()) { return false;}
 		}
-		relloc();
+		for(size_t i = this->m_size; i > pos; i++) {
+			this->m_head[i] = this->m_head[i - 1];
+		}
+		this->m_head[pos] = val;
+		this->m_size++;
+		return true;
 	}
 
 	bool del(node_p pos) override {
-		node_p re_pos = pos;
-		int pos_ins = ((int)pos - (int)this->m_head) / sizeof(node_t);
-		if(!(pos >= 0 && pos < this->m_size)) {
+		if(!(pos >= this->m_head && pos < this->m_head + this->m_size)) {
 			TT_DEBUG << "Array::del(pos): error pos!";
 			return false;
 		}
 
-		for(size_t i = pos_ins + 1; i < this->m_size; i++) {
-			this->m_head[i - 1] = this->m_head[i];
+		
+		for(; pos < this->m_head + this->m_size - 1; pos++) {
+			*(pos) = *(pos + 1);
 		}
 		this->m_size--;
+		return true;
 	}
 
 	node_p find(const node_t& val, size_t ins) override {
@@ -126,7 +130,7 @@ public:
 		return nullptr;
 	}
 
-	node_p find(const node_t& val, int ins, int len) override {
+	node_p find(const node_t& val, size_t ins, int len) override {
 		len = this->m_size - ins > len ? len : this->m_size - len;
 		for(int i = 0; i < len; i++) {
 			if(this->m_head[i + ins] == val) { return this->m_head + i + ins;}
@@ -135,17 +139,29 @@ public:
 	}
 
 	bool alter(node_p pos, const node_t& to_val) override {
-		uint64_t int_pos = uint64_t(pos);
-		uint64_t int_head = uint64_t(this->m_head);
-		if(int_pos < int_head || int_pos > this->m_head + sizeof(node_t) * this->m_size) {
+		if(pos < this->m_head || pos > this->m_head + this->m_size) {
 			TT_DEBUG << "Array::alter: error pos";
 			return false;
 		}
 		*pos = to_val;
 		return true;
 	}
+
+	size_t clean() override { 
+		if(this->m_head != nullptr) {
+			free(this->m_head);
+			this->m_head = nullptr;
+		}
+		this->m_size = 0;
+		this->m_capacity = 0;
+		return this->m_size;
+	}
+
+	node_p get_pos_from_ins(size_t ins) { return this->m_head + ins; }
+	node_r operator[](int ins) { return this->m_head[ins]; }
 private:
 	bool relloc() {
+		if(this->m_capacity == 0) { this->m_capacity = 8; }
 		node_t* mid_array = nullptr;
 		mid_array = (node_t*)malloc(sizeof(node_t) * this->m_size);
 
@@ -162,6 +178,7 @@ private:
 			this->m_head[i] = mid_array[i];
 		}
 		free(mid_array);
+		return true;
 	}
 
 
@@ -170,7 +187,6 @@ protected:
 
 
 }; // Array
-
 } // namespcae tt 
 
 
