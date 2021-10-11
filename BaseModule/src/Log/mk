@@ -2,8 +2,9 @@
     
 clear 
     
-g++  -l log\
+g++ \
     test_Log_white.cc \
+-l  log  \
 -o ../../bin/test_Log_white.exe
     
 ../../bin/test_Log_white.exe
