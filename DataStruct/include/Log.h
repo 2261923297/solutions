@@ -30,7 +30,6 @@
 
 #define LOG_DEBUG(logger) LOG_LEVEL(logger, LogLevel::Level::DEBUG) \
 
-
 namespace ttlog {
 
 class Event {
@@ -129,6 +128,7 @@ xx(NewLineFormatItem, getNewLine)
 xx(MessageFormatItem, getMessage)
 xx(TabFormatItem, getTab)
 xx(FileNameFormatItem, getFileName)
+xx(LoggerNameFormatItem, getLoggerName)
 #undef xx
 // #undef xx  //xx(C, EventFun)
 // 
@@ -219,14 +219,9 @@ class Logger {
 public:
 	typedef std::shared_ptr<Logger> ptr;
 
-	Logger(const std::string& name) : m_name(name) {
-		if(m_name == "system") {
-			ttlog::Formatter::ptr f(new ttlog::Formatter("/l/tab/fn/s{::}/ln/s{----}/m"));
-			ttlog::Appandar::ptr ap = ttlog::Appandar::ptr(new ttlog::StdoutAppandar);
-
-			addAppandar(ap);
-			setFormatter(f);
-		}
+	Logger(const std::string& name, const std::string& format = "/s{[}/l/s{]}/tab/s{[}/lm/s{]}/tab/fn/s{::}/ln/s{:}/tab/m") : m_name(name) {
+		m_def_formatter = Formatter::ptr(new Formatter(format));
+		m_def_appandar = Appandar::ptr(new StdoutAppandar);
 	}
 
 	~Logger() { }
@@ -241,7 +236,11 @@ public:
 	{ m_def_formatter = Formatter::ptr(new Formatter(str)); }
 
 	void 
-	setFormatter(Formatter::ptr formatter) { m_def_formatter = formatter; }
+	setFormatter(Formatter::ptr formatter) { 
+		m_def_formatter.reset();
+		m_def_formatter = formatter;
+	}
+
 
 	void 
 	setFormatter(Formatter* pFormatter) { m_def_formatter.reset(pFormatter); }
@@ -254,6 +253,7 @@ public:
 protected:
 	std::string m_name;
 	std::vector<Appandar::ptr> m_appandars;
+	Appandar::ptr  m_def_appandar;
 	Formatter::ptr m_def_formatter;
 };
 
@@ -299,8 +299,6 @@ static void
 operator<<(ttlog::Appandar::ptr ap, const std::string& str) {
 	ap->appand(str);
 }
+static ttlog::Logger::ptr logger_system = ttlog::Logger::ptr(new ttlog::Logger("SYSTEM"));
 
-static ttlog::Logger::ptr g_logger(new ttlog::Logger("system"));
-
-#define TT_DEBUG LOG_DEBUG(g_logger)
-
+#define TT_DEBUG LOG_DEBUG(logger_system)

@@ -34,15 +34,16 @@ public:
 	using node_r = NodeType&;
 
 	using ptr = std::shared_ptr<structrue>;
-	structrue(size_t size = 0) { 
-		reset(size); 
+	structrue() { 
+		m_size = m_capacity = 0;
+		m_head = nullptr;
 		m_strategies = ContainerStrategies::ptr(new ContainerStrategies); 
 	}	
 	
 	virtual ~structrue() { }
 
 	virtual bool
-	add(const node_t& val, size_t pos) = 0;
+	add(const node_t& val, size_t pos = -1) = 0;
 
 	virtual bool
 	del(node_p pos) = 0;
@@ -59,23 +60,13 @@ public:
 	virtual size_t 
 	clean() = 0;
 
-	bool reset(size_t size)  { 
-		clean();
-		if(size != 0) {
-			m_head = (node_p)malloc(sizeof(node_t) * size);
-			if(m_head == nullptr) {
-				TT_DEBUG << "no memory! "; 
-				return false;
-			}
-		}
-		m_size = m_capacity = size;
-		return m_size;
-	}
+	virtual bool reset(size_t size) = 0;
 
  
 	size_t size() { return m_size; }
 	size_t capacity() { return m_capacity; }
 
+	virtual node_r operator[](int ins) = 0; 
 protected:
 	node_p m_head;
 	size_t m_size;
@@ -94,14 +85,21 @@ public:
 	using node_r = NodeType&;
 
 
-	Array(size_t size = 8) : structrue<node_t>(size) {}
+	Array(size_t size = 8) {
+		reset(size);
+		TT_DEBUG << "array structbeg";
+	}
 	virtual ~Array() { clean(); }
 	bool add(const node_t& val, size_t pos = -1) override {
 		if(pos == -1) { pos = this->m_size; }
 		if(this->m_capacity - this->m_size <= 0) {
-			if(false == relloc()) { return false;}
+			if(false == relloc()) { 
+				return false;
+				TT_DEBUG << "relloc error";
+			}
 		}
-		for(size_t i = this->m_size; i > pos; i++) {
+		
+		for(size_t i = this->m_size; i > pos; i--) {
 			this->m_head[i] = this->m_head[i - 1];
 		}
 		this->m_head[pos] = val;
@@ -157,14 +155,28 @@ public:
 		return this->m_size;
 	}
 
+	bool reset(size_t size) override   { 
+		clean();
+		if(size != 0) {
+			this->m_head = (node_p)malloc(sizeof(node_t) * size);
+			if(this->m_head == nullptr) {
+				TT_DEBUG << "no memory! "; 
+				return false;
+			}
+		}
+		this->m_capacity = size;
+		return this->m_size;
+	}
+
 	node_p get_pos_from_ins(size_t ins) { return this->m_head + ins; }
-	node_r operator[](int ins) { return this->m_head[ins]; }
+	node_r operator[](int ins) override { return this->m_head[ins]; }
 private:
 	bool relloc() {
+		size_t size = this->m_size;
 		if(this->m_capacity == 0) { this->m_capacity = 8; }
+
 		node_t* mid_array = nullptr;
 		mid_array = (node_t*)malloc(sizeof(node_t) * this->m_size);
-
 		if(mid_array == nullptr) {
 			TT_DEBUG << "Array::relloc: no memory!";
 			return false;
@@ -174,10 +186,12 @@ private:
 		}
 
 		this->reset(this->m_strategies->get_new_size_add(this->m_capacity));
-		for(int i = 0; i < this->m_size; i++) {
+		for(int i = 0; i < size; i++) {
 			this->m_head[i] = mid_array[i];
+			this->m_size++;
 		}
 		free(mid_array);
+
 		return true;
 	}
 

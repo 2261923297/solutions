@@ -4,10 +4,16 @@ using namespace tt;
 void
 test_base() { 
 	TT_DEBUG << "";
-	Array<int>::ptr array(new Array<int>);
+	structrue<int>::ptr array(new Array<int>);
+
 	for(int i = 0; i < 10; i++) {
 		array->add(i);
+		TT_DEBUG << i 
+			<< ", array size: " << array->size() 
+			<< ", array capacity: " << array->capacity();
+	
 	}
+
 	std::stringstream ss;
 	for(int i = 0; i < 10; i++) {
 		ss << (*array)[i];
@@ -19,7 +25,6 @@ test_base() {
 
 int
 main(int argc, char** argv) {
-	TT_DEBUG << "Hello, structrue!" << std::endl;
 	test_base();
 
 	return 0; 
