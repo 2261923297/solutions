@@ -300,5 +300,7 @@ operator<<(ttlog::Appandar::ptr ap, const std::string& str) {
 	ap->appand(str);
 }
 static ttlog::Logger::ptr logger_system = ttlog::Logger::ptr(new ttlog::Logger("SYSTEM"));
+static ttlog::Logger::ptr logger_root = ttlog::Logger::ptr(new ttlog::Logger("ROOT"));
 
 #define DEBUG_SYS LOG_DEBUG(logger_system)
+#define TT_DEBUG LOG_DEBUG(logger_root)
