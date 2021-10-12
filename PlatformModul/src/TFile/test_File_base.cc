@@ -64,11 +64,9 @@ void test_FileManager() {
 }
 int main() {
 	std::cout << "Hello, test_File_func!" << std::endl;
-//	test_base();
-//	test_data();
-//	test_entry();
-//	test_FileManager();	
-
+	test_base();
+	test_entry();
+	test_FileManager();	
 	return 0;
 
 }

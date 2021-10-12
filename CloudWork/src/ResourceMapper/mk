@@ -1,0 +1,14 @@
+#!/bin/bash
+
+clear 
+
+g++ ResourceMapper.cc   \
+    test_ResourceMapper_func.cc  \
+-l log \
+-o ../../bin/test_ResourceMapper_func.cc.o
+
+
+chmod a+x ../../bin/test_ResourceMapper_func.cc.o 
+
+../../bin/test_ResourceMapper_func.cc.o
+
