@@ -10,15 +10,12 @@ test_base() {
 		"Get /usr",
 		"List /usr",
 		"Update /usr"
-
 	};
 	for(auto work : works) {
 
 		manager->schedul(work);
 	}
-
 }
-
 
 int
 main(int argc, char** argv) {

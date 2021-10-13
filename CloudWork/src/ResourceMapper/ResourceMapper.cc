@@ -64,7 +64,6 @@ void Manager::mapping_worker(const std::string& cmd) {
 	if(it != m_mapper->s_worker_mapper.end()) {
 		worker = it->second();
 	}
-	TT_DEBUG << "end finding!";
 
 	Worker::ptr w_ptr(nullptr);
 	if(worker != nullptr)
