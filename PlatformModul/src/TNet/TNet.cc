@@ -18,15 +18,13 @@ Socket::~Socket() {
 }
 
 void Socket::init_sock() {
-	int val = 1;
 }
 void Socket::new_sock() {
-	m_sock = socket(m_family, m_type, m_protocol);
 	if(m_sock != -1) {
 		close();
 	}
+	m_sock = socket(m_family, m_type, m_protocol);
 	init_sock();
-
 }
 bool Socket::init(int sock) {
 	m_sock = sock;
@@ -65,14 +63,15 @@ bool Socket::bind(const Address::ptr addr) {
 		return false;
 	}
 
+	TT_DEBUG << "addr_family is equal soket.family";
 	// unix bind;
 	if(::bind(m_sock, addr->addr(), addr->addr_len())) {
 		TT_DEBUG << "bind error errno = " << errno 
 				 << " errstr = " << strerror(errno);
 		return false;
 	}
-
-	local_addr();
+	TT_DEBUG << "bind_end";
+	local_addr()->to_string();
 	return true;
 }
 bool Socket::connect(const Address::ptr addr) {
@@ -202,22 +201,26 @@ Address::ptr Socket::remote_addr() {
 		return Address::ptr(new UnknownAddress(m_family));
 	}
 	m_remote_addr = result;
+
+	m_remote_addr->to_string();
 	return m_remote_addr;
 
 }
 Address::ptr Socket::local_addr() {
-	if(m_local_addr) {
+	if(m_local_addr.get() != nullptr) {
 		return m_local_addr;
 	}
 
-	Address::ptr result = AddressManager::NewAddress(m_family);
 
+	Address::ptr result = AddressManager::NewAddress(m_family);
+	
 	socklen_t addrlen = result->addr_len();
 	if(getsockname(m_sock, result->addr(), &addrlen)) {
 		TT_DEBUG << "getsockname error sock=" << m_sock;
 		return Address::ptr(new UnknownAddress(m_family));
 	}
 	m_local_addr = result;
+
 	return m_local_addr;
 
 }

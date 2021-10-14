@@ -10,9 +10,9 @@
 #include <vector>
 #include <map>
 #include "Log.h"
-
 namespace tt {
 namespace net {
+
 class Address {
 public:
 	using ptr = std::shared_ptr<Address>;
@@ -38,22 +38,21 @@ protected:
 
 class IPAddress : public Address {
 public:
-	std::shared_ptr<IPAddress> ptr;
+	using ptr = std::shared_ptr<IPAddress>;
 	static IPAddress::ptr Create(const char* address, uint16_t port = 0);
 	virtual IPAddress::ptr broadcast_addr(uint32_t prefix_len) = 0;
-	virtual IPAddress::ptr network_adddr(uint32_t prefix_len) = 0;
+	virtual IPAddress::ptr network_addr(uint32_t prefix_len) = 0;
 	virtual IPAddress::ptr subnet_mask(uint32_t prefix_len) = 0;
 	virtual uint32_t port() const = 0;
 	virtual void set_port(uint16_t v) = 0;
 private:
-
 
 }; // IPAddress 
 
 class IPv4Address : public IPAddress {
 public:
 
-	typedef std::shared_ptr<IPv4Address> ptr;
+	using ptr = std::shared_ptr<IPv4Address>;
 	static IPv4Address::ptr Create(const char* address, uint16_t port = 0);
 	IPv4Address(const sockaddr_in& address);
 	IPv4Address(uint32_t address = INADDR_ANY, uint16_t port = 0);
@@ -62,16 +61,16 @@ public:
 	socklen_t& addr_len() override;
 	std::ostream& insert(std::ostream& os) const override;
 
-	IPAddress::ptr broadcast_address(uint32_t prefix_len) override;
-	IPAddress::ptr netword_address(uint32_t prefix_len) override;
+	IPAddress::ptr broadcast_addr(uint32_t prefix_len) override;
+	IPAddress::ptr network_addr(uint32_t prefix_len) override;
 	IPAddress::ptr subnet_mask(uint32_t prefix_len) override;
 	uint32_t port() const override;
 	void set_port(uint16_t v) override;
 
 private:
 	sockaddr_in m_addr;
-
-}
+	socklen_t m_len;
+};;
 class UnknownAddress : public Address {
 public:
 	UnknownAddress(int family) { m_addr.sa_family = family; }
@@ -88,7 +87,7 @@ private:
 }; // UnknownAddress
 class AddressManager {
 public:
-	static Address::ptr NewAddress(int family) { return Address::ptr(nullptr); }
+	static Address::ptr NewAddress(int family);
 
 private:
 }; // AddressManager;
