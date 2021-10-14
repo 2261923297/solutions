@@ -18,6 +18,7 @@ Socket::~Socket() {
 }
 
 void Socket::init_sock() {
+
 }
 void Socket::new_sock() {
 	if(m_sock != -1) {
@@ -29,12 +30,12 @@ void Socket::new_sock() {
 bool Socket::init(int sock) {
 	m_sock = sock;
 	m_is_connected = true;
-	init_sock();
 
+	init_sock();
 	local_addr();
 	remote_addr();
 
-	return false;
+	return true;
 }
 
 Socket::ptr Socket::accept() {
@@ -63,7 +64,6 @@ bool Socket::bind(const Address::ptr addr) {
 		return false;
 	}
 
-	TT_DEBUG << "addr_family is equal soket.family";
 	// unix bind;
 	if(::bind(m_sock, addr->addr(), addr->addr_len())) {
 		TT_DEBUG << "bind error errno = " << errno 

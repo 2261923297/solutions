@@ -5,6 +5,7 @@ clear
 g++ TNet.cc Address.cc \
 -l	file \
 -l	log  \
+-l  pthread \
     test_TNet_func.cc  \
 -o ../../bin/test_TNet_func.cc
 

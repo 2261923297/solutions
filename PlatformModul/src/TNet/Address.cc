@@ -23,7 +23,6 @@ IPv4Address::Create(const char* address, uint16_t port) {
 	rt->m_addr.sin_family = AF_INET;
 	rt->m_addr.sin_port = htons(port);
 	rt->m_len = sizeof(rt->m_addr);
-	TT_DEBUG << "m_len = " << rt->m_len;
 
 	return rt;
 }

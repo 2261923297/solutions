@@ -77,14 +77,13 @@ public:
 	virtual sockaddr* addr() override { return &m_addr; }
 	virtual socklen_t& addr_len() override { return m_len; }
 	
-	virtual std::ostream& insert(std::ostream& os) const override { os << "UnknownAddress::insert";  return os;}
+	virtual std::ostream& insert(std::ostream& os) const override { os << "family: " << m_addr.sa_family;  return os;}
 	
-	
-
 private:
 	sockaddr m_addr;
 	socklen_t m_len;
 }; // UnknownAddress
+
 class AddressManager {
 public:
 	static Address::ptr NewAddress(int family);
