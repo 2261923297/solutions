@@ -1,0 +1,14 @@
+#!/bin/bash
+
+clear 
+
+g++ Trancer.cc   \
+    test_Trancer_func.cc  \
+-l net -l address -l file -l log \
+-o ../../bin/test_Trancer_func.cc.o
+
+
+chmod a+x ../../bin/test_Trancer_func.cc.o 
+
+../../bin/test_Trancer_func.cc.o
+
