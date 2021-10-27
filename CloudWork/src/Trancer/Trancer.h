@@ -24,7 +24,6 @@ public:
 		set_file(file_name);
 		set_type(type);
 	}
-
 private:
 	std::string m_file;
 	task_type   m_type;
