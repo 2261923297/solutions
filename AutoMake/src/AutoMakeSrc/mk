@@ -1,6 +1,7 @@
 #!/bin/bash
 
 clear
+rm ../../bin/test_AutoMakeSrc_base.o
 
 g++ test_AutoMakeSrc_base.cc \
 	AutoMakeSrc.cc			 \

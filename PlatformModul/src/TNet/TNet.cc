@@ -138,10 +138,9 @@ bool Socket::close() {
 
 int Socket::send(const void* buffer, size_t len, int flags) {
 	if(is_connected()) {
-		return ::send(m_sock, buffer, len, flags);
+		int n_send =  ::send(m_sock, buffer, len, flags);
 	}
 	return -1;
-
 }
 
 int Socket::send_to(const void* buffer, size_t len, const Address::ptr to, int flags) {
@@ -149,7 +148,6 @@ int Socket::send_to(const void* buffer, size_t len, const Address::ptr to, int f
 		return ::sendto(m_sock, buffer, len, flags, to->addr(), to->addr_len());
 	}	
 	return -1;
-
 }
 
 int Socket::recv(void* buffer, size_t len, int flags) {

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+clear 
+
+g++ Timer.cc   \
+    test_Timer_func.cc  \
+-o ../../bin/test_Timer_func.cc.o
+
+
+chmod a+x ../../bin/test_Timer_func.cc.o 
+
+../../bin/test_Timer_func.cc.o
+

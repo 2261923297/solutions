@@ -31,8 +31,9 @@ public:
 		m_dm->addDir("bin");
 		m_dm->addDir("doc");
 		m_dm->addDir("src");
-		m_dm->addDir("include");
-		m_dm->addDir("lib");
+		m_dm->addDir("depend");
+		m_dm->addDir("depend/include");
+		m_dm->addDir("depend/lib");
 		m_dm->addDir("test");
 		m_dm->addDir("examples");
 		

@@ -48,21 +48,22 @@ void single_echo_server() {
 
 
 void only_send_client() {
-	Address::ptr ser_addr(IPv4Address::Create("127.0.0.1", 8088));
+	Address::ptr ser_addr(IPv4Address::Create("127.0.0.1", 8090));
 	Socket::ptr client(new Socket(AF_INET, SOCK_STREAM));
 	if(!client->connect(ser_addr)) {
 		TT_DEBUG << "Can^t connect";
+		return;
 	}
 	TT_DEBUG << "client contected\nlocal_addr" << client->local_addr()->to_string()
 			<< "\nremote_addr: " << client->local_addr()->to_string();
 	
 	const std::string msg = "Hello, echo_server";
 	TT_DEBUG << "begin send";
+	
 	while(client->send(msg.c_str(), msg.size())) {
-		std::cout << "send 1";
-		break;
+		std::cout << "send 1\n";
+	//	break;
 	}
-		
 }
 
 void
@@ -72,7 +73,8 @@ test_base() {
 int
 main(int argc, char** argv) {
 //	std::thread trd_echo_server(single_echo_server);
-	std::thread trd_only_send_clent(only_send_client);
+//	std::thread trd_only_send_clent(only_send_client);
+	only_send_client();
 /*
 	trd_echo_server.detach();
 

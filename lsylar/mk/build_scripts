@@ -1,0 +1,49 @@
+#!/bin/bash
+
+clear
+
+src_name=$1
+root=~/cpp/tt_slt/
+
+bin=$root\bin/
+inc=$root\include/
+src=$root\src/
+lib=$root\lib/
+tes=$root\test/
+mk=$root\mk/
+
+test_src=test_$src_name
+
+test_file=$tes$test_src.cc
+src_file=$src$src_name.cc
+exe_file=$bin/$test_src.o
+
+lib_file=$lib\lib$src_name.so
+
+rm $exe_file
+
+#create lib.so
+g++ $src_file					\
+-I $inc							\
+-L $lib							\
+-Wl,-rpath $lib					\
+-fPIC -shared					\
+-o $lib_file
+
+#create test.o
+g++ $test_file					\
+-g								\
+-I $inc							\
+-L $lib							\
+-Wl,-rpath $lib					\
+-l $src_name					\
+-l Log							\
+-l Mutex						\
+-l Thread						\
+-l Fiber						\
+-l pthread						\
+-o $exe_file
+
+chmod a+x $exe_file
+$exe_file
+

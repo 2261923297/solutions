@@ -5,6 +5,7 @@ clear
 g++ Fiber.cc   \
     test_Fiber_func.cc  \
 	../../include/Log.cc \
+-I ../../include/	\
 -o ../../bin/test_Fiber_func.cc
 
 

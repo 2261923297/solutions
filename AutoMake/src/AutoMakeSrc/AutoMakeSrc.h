@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <vector>
 #include <memory>
@@ -26,6 +27,9 @@ public:
 	static const std::string&
 	GetBinDir() { return s_binDir; }
 
+	static const std::string&
+	GetDependDir() { return s_dependDir; }
+
 	static void
 	SetProjectName(const std::string& val) { s_projectName = val; }
 
@@ -35,11 +39,15 @@ public:
 	static void
 	SetBinDir(const std::string& val) { s_binDir = val; }
 
+	static void 
+	SetDependDir(const std::string& val) { s_dependDir = val; }
+
 	void showData();
 public:
 	static std::string s_projectName;
 	static std::string s_projectPath; // to delete arg
 	static std::string s_binDir;	
+	static std::string s_dependDir;
 
 protected:
 	std::stringstream m_ss;
@@ -81,15 +89,10 @@ public:
 	
 
 protected:
-
 	std::map<const std::string, ContextMaker::ptr> m_makers;
-//	std::vector<ContextMaker::ptr> m_makers;
 
 }; // AutoMakeSrc
 
-
-
-
-
+//std::string ContextMaker::s_dependDir = "";
 
 

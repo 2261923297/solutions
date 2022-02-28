@@ -3,8 +3,8 @@
 clear
 # g++ File.cc \
 	
-g++	test_File_base.cc \
-	-l file \
+g++	test_File_base.cc	\
+		File.cc			\
 -o ../../bin/test_File_base
 
 chmod a+x ../../bin/test_File_base

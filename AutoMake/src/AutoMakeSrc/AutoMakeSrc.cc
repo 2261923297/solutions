@@ -50,12 +50,15 @@ xx(TestContextMaker, makeContext) {
 xx(MakeContextMaker, makeContext) {
 
 	std::string test_file_name = "test_" + ContextMaker::GetProjectName() + "_func.cc";
-	m_ss << "#!/bin/bash" << "\n\n"
-		<< "g++ " << ContextMaker::GetProjectName() << ".cc   \\" << "\n"
-		<< "    " << test_file_name << "  \\" << "\n"
-		<< "-o " << s_binDir << test_file_name << "\n\n\n"
-		<< "chmod a+x " << s_binDir << test_file_name << " \n\n"
-		<< s_binDir << test_file_name << "\n"
+	m_ss << "#!/bin/bash" << "\n\n"											// #!/bin/bash
+		<< "clear \n\n"
+		<< "rm " << s_binDir << test_file_name << "\n\n"
+		<< "g++ " << ContextMaker::GetProjectName() << ".cc   \\" << "\n"   // g++ src.cc 
+		<< "    " << test_file_name << "  \\" << "\n"						//	test_src_finc.cc
+		<< "-I "  << ContextMaker::GetDependDir() << "include/ \\" << "\n"	// -I depend/include/
+		<< "-o " << s_binDir << test_file_name << "\n\n\n"					// -o bin/test_func.o
+		<< "chmod a+x " << s_binDir << test_file_name << " \n\n"			// chmod a+x bin/test_func.o
+		<< s_binDir << test_file_name << "\n"								// bin/test_func.o
 		<< std::endl;
 }
 
