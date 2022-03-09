@@ -2,14 +2,9 @@
 
 namespace tt {  
 
-Config::Config() { 
+
+namespace system {
 
 
-}
-
-Config::~Config() {
-
-
-}
-
+} // namespace system
 } // namespace tt

@@ -1,20 +1,20 @@
 #include "thread_pool.h"
+#include <unistd.h>
 
-void* thrd_func(void* arg) {
-	sem_t* sem = (sem_t*)arg;
-	sleep(1);
-	printf("thread end");
-	sem_post(sem);
-	
+void tp_func() {
+	printf(__FUNCTION__ " begin\n");
+	sleep(1000);
+	printf(__FUNCTION__ " end\n");
 }
 
-
 int main() {
-	sem_t sem ;
-	sem_init(&sem, 0, 10);
 
+	int thread_num = 10;
 	thread_pool tp;
-	tp.add_func(thrd_func, args);
+	for(int i = 0; i < thread_num ; i++) { 
+		tp.add_task(tp_func);
+	}
+	
 
 	return 0;
 }
