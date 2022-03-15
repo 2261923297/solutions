@@ -1,0 +1,11 @@
+#!/bin/bash 
+
+ clear 
+
+ ../../am -p ./ $1 
+
+ chmod a+x ./$1/mk 
+
+ cd ./$1 
+ vim $1.h 
+
