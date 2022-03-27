@@ -57,15 +57,11 @@ public:
 public:
 	static void SetThis(Fiber* fb);
 	static Fiber* GetThis();
-
 	static void YeldToHold();
 
 	static void YeldToReady();
-
 	static uint64_t TotalFibers();
-
 	static uint64_t GetFiberId();
-
 	static void MainFunc();
 private:
 	uint64_t m_id = 0;

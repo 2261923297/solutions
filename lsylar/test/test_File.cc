@@ -1,14 +1,14 @@
 #include "File.h"
+#include "Log.h"
 
 void test_base() {
-
-	tt::File::Path p("./");
+	tt::system::Path p("./");
 	p.showData();
-	std::cout << "getcwd: " << p.current() << std::endl;
+	TT_DEBUG << "getcwd: " << p.current() << std::endl;
 
 	std::vector<std::string> dirs;
 	p.getdirs(dirs, "/tt/cpp/solution");
-	std::cout << "dirs: ";
+	TT_DEBUG << "dirs: ";
 	for(auto name : dirs) {
 		std::cout << name << ", ";
 	}
@@ -19,7 +19,7 @@ void test_base() {
 	p.showData();
 }
 
-void test_data(tt::File::Data::ptr d) {
+void test_data(tt::system::Data::ptr d) {
 	std::cout << "path: " << d->getPath()
 		<< "\n\texit: "	<< d->exit()
 		<< "\n\tisDir: " << d->isDir()
@@ -29,11 +29,15 @@ void test_data(tt::File::Data::ptr d) {
 
 }
 void test_entry() {
-	tt::File::Entry entry(tt::File::Path("/tt/cpp/solutions/PlatformModul/src/TFile/test_file.txt"));
+	tt::system::Entry entry(
+		tt::system::Path(
+			"/root/cpp/solutions/lsylar/bin/for_test"
+		));
 		
 	entry.getData()->showData();
 	entry.getPath()->showData();
 	entry.reopen("w");
+
 	const size_t capa = 1025;
 	size_t size = capa - 1;
 	char buffer[capa] = { 0 };	
@@ -57,15 +61,18 @@ void test_entry() {
 }
 
 void test_FileManager() {
-	tt::File::FileManager<tt::File::LinuxDirMaker> fm;
+	tt::system::FileManager<tt::system::LinuxDirMaker> fm;
 	fm.mkdir("./test_dir");
 	fm.mkdirs("./111/222/333/444");
 
 }
 int main() {
-	std::cout << "Hello, test_File_func!" << std::endl;
+	TT_DEBUG << "Hello, test_File_func!" << std::endl;
 	test_base();
+
+	TT_DEBUG << "test_entry: { ";
 	test_entry();
+	std::cout << "\n}\n\n";
 	test_FileManager();	
 	return 0;
 

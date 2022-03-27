@@ -1,10 +1,12 @@
 #include "thread_pool.h"
 #include <unistd.h>
+#include "Log.h"
+using namespace tt::system;
 
 void tp_func() {
-	printf(__FUNCTION__ " begin\n");
+	TT_DEBUG << __FUNCTION__ << " begin\n";
 	sleep(1000);
-	printf(__FUNCTION__ " end\n");
+	TT_DEBUG << __FUNCTION__ << " end\n";
 }
 
 int main() {

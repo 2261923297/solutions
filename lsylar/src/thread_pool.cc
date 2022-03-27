@@ -1,4 +1,5 @@
 #include "thread_pool.h"
+#include <mutex>
 
 
 namespace tt {
@@ -8,7 +9,7 @@ namespace system {
 thread_pool::thread_pool(uint64_t thread_num ) {
 	m_thread_num = thread_num;
 	m_tasks.clear();
-	m_sema = new std::counting_semaphore<100>(0);
+	m_sema = std::shared_ptr<new std::counting_semaphore<MAX_TASK_NUM>(0)>;
 	this->start();
 }
 
@@ -45,7 +46,6 @@ void thread_pool::run() {
 	}
 }
 void thread_pool::stop() {
-
 	for(int i = 0; i < m_thread_num; i++) {
 		m_threads[i].join();
 	}

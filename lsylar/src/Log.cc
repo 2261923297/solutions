@@ -1,19 +1,25 @@
 #include "Log.h"
 #include <string>
 
-ttlog::Event::Event(const std::string& loggerName, LogLevel::Level level
-	, uint64_t line, std::string fileName
-	)
+
+namespace tt {
+namespace system {
+
+Event::Event(const std::string& loggerName, LogLevel::Level level
+			, uint64_t line, const std::string& fileName
+			, const std::string& func_name
+		)
 :m_loggerName(loggerName), m_line(line), m_file(fileName), m_level(level) 
 {
-
+	m_func_name = func_name;
 }
-ttlog::Event::~Event() {
+
+Event::~Event() {
 	
 }
 
 void 
-ttlog::Event::debugOut()  {
+Event::debugOut()  {
 	std::cout << "[" << m_level << "] "
 		<< m_file << ": " << m_line
 		<< "\t" << m_ss.str() << std::endl;
@@ -22,13 +28,13 @@ ttlog::Event::debugOut()  {
 
 
 void 
-ttlog::Formatter::resetFormat(const std::string& format) {
+Formatter::resetFormat(const std::string& format) {
 	setFormat(format);
 	initFormatItem();
 }
 
 std::string 
-ttlog::Formatter::generate(Event::ptr e) {
+Formatter::generate(Event::ptr e) {
 	std::stringstream ss;
 	for(auto item : m_items) {
 		item->format(e, ss);
@@ -37,7 +43,7 @@ ttlog::Formatter::generate(Event::ptr e) {
 }
 
 void 
-ttlog::Formatter::initFormatItem() {
+Formatter::initFormatItem() {
 	
 	static std::map<std::string, std::function<FormatItem::ptr(const std::string)> > s_str_item_mapper = {
 #define xx(str, C) \
@@ -51,6 +57,8 @@ ttlog::Formatter::initFormatItem() {
 		, xx(s,  StringFormatItem)
 		, xx(ln, LineFormatItem)
 		, xx(lm, LoggerNameFormatItem)
+		, xx(func, FunctionNameFormatItem)
+		, xx(sp, SpaceFormatItem)
 	};
 #undef xx
 	std::string pure_format = "";
@@ -100,7 +108,7 @@ ttlog::Formatter::initFormatItem() {
 }
 
 void
-ttlog::Logger::log(ttlog::Event::ptr e)  {
+Logger::log(tt::system::Event::ptr e)  {
 	if(m_appandars.size() == 0) {
 		m_def_appandar << m_def_formatter->generate(e);
 		return;
@@ -112,3 +120,5 @@ ttlog::Logger::log(ttlog::Event::ptr e)  {
 	}
 }
 
+} // namespace system
+} // namespace tt

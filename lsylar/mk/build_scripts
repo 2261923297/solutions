@@ -3,7 +3,7 @@
 clear
 
 src_name=$1
-root=~/cpp/tt_slt/
+root=~/cpp/solutions/lsylar/
 
 bin=$root\bin/
 inc=$root\include/
@@ -24,6 +24,7 @@ rm $exe_file
 
 #create lib.so
 g++ $src_file					\
+-std=c++2a                      \
 -I $inc							\
 -L $lib							\
 -Wl,-rpath $lib					\
@@ -32,6 +33,7 @@ g++ $src_file					\
 
 #create test.o
 g++ $test_file					\
+-std=c++2a                      \
 -g								\
 -I $inc							\
 -L $lib							\

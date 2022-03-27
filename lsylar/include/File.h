@@ -20,7 +20,7 @@
 	xx(Platform::Type::UNKNOWN) \
 //
 
-#include "../../include/EnumReflection.h"
+#include "EnumReflection.h"
 /*
 #define ENUM_CLASS_NAME FileType
 #define ENUM_NAME Type
@@ -32,8 +32,9 @@
 #ifndef PLATFORM
 #define PLATFORM Platform::Type::LINUX
 #endif
+
 namespace tt {
-namespace File {
+namespace system {
 
 class Data {
 public:
@@ -63,7 +64,7 @@ private:
 
 class Path {
 public:
-	using ptr = std::shared_ptr<tt::File::Path>;
+	using ptr = std::shared_ptr<tt::system::Path>;
 
 	Path(const std::string& path, char dir_split = '/') 
 	: m_dir_split(dir_split) { reset(path); }
@@ -101,7 +102,7 @@ protected:
 class Entry {
 public:
 
-	typedef std::shared_ptr<tt::File::Entry> ptr;
+	typedef std::shared_ptr<tt::system::Entry> ptr;
 
 	Entry(std::string& path) { init(path);  }
 	Entry(const Path& path) { init(path.path()); }
@@ -186,7 +187,5 @@ protected:
 
 }; // Filanager
 
-} // namespace File
-
-
-}
+} // namespace system
+} // namespace tt

@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
-	
+#include <sys/time.h>
+
 static inline uint64_t cur_time_ms();
 static inline uint64_t cur_time_us();
 

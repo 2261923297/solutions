@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <string>
 #include <sstream>
+#include <string.h>
 
 #define ENUM_CLASS_NAME LogLevel
 #define ENUM_NAME Level
@@ -26,23 +27,59 @@
 //
 #include "../../include/EnumReflection.h"
 
-#define LOG_LEVEL(logger, level) \
-	ttlog::EventVar(logger, ttlog::Event::ptr(new ttlog::Event(logger->getName(), level, __LINE__, __FILE__))).getSS()
+
+
+static size_t find_char(const char* chs, size_t size
+	, char ch, std::vector<size_t>& vecs) {
+
+	size_t rt = 0;
+	for (size_t i = 0; i < size; i++) {
+		if (chs[i] == ch) {
+			vecs.push_back(i);
+			rt++;
+		}
+	}
+	return rt;
+}
+
+static std::string sp_file(const char* file_name) {
+	std::vector<size_t> sps;
+	size_t nsp = find_char(file_name, strlen(file_name), '/', sps);
+	nsp = nsp > 2 ? 2 : nsp;
+	std::string rt(file_name);
+	return rt.substr(sps[sps.size() - nsp] + 1);
+}
+
+#define LOG_LEVEL(logger, level) 	\
+	tt::system::EventVar(logger		\
+	, tt::system::Event::ptr(		\
+		new tt::system::Event(		\
+			logger->getName()		\
+			, level					\
+			, __LINE__				\
+			, sp_file(__FILE__)		\
+			, __FUNCTION__			\
+		))).getSS()					\
+//
 
 #define LOG_DEBUG(logger) LOG_LEVEL(logger, LogLevel::Level::DEBUG) \
 
-namespace ttlog {
+namespace tt {
+namespace system {
+
 
 class Event {
 public:
 	typedef std::shared_ptr<Event> ptr;
 
 	Event(const std::string& loggerName, LogLevel::Level level
-			, uint64_t line, std::string fileName
+			, uint64_t line, const std::string& fileName
+			, const std::string& func_name
 		);
 
 	~Event();
 	
+	const std::string& getFuncName() const { return m_func_name; }
 	LogLevel::Level 
 	getLevel() { return m_level; }
 
@@ -50,30 +87,34 @@ public:
 	getSS() { return m_ss; }
 	
 	uint64_t 
-	getLine() { return m_line; }
+	getLine() const { return m_line; }
 	
-	std::string 
-	getFileName() { return m_file; }
+	const std::string&
+	getFileName() const { return m_file; }
 	
-	std::string
-	getTab() { return "\t";	}
+	const std::string
+	getTab() const { return "\t";	}
 
-	std::string 
-	getNewLine() { return "\n"; }
+	const std::string
+	getNewLine() const { return "\n"; }
 
-	std::string
-	getMessage() { return m_ss.str(); }
+	const std::string
+	getMessage() const { return m_ss.str(); }
 	void 
 	debugOut();
 
-	std::string& 
-	getLoggerName() { return m_loggerName; }
+	const std::string&
+	getLoggerName() const { return m_loggerName; }
+
+	const std::string 
+	getSpace() const { return " "; }
 
 private:
 	std::string m_loggerName;
 	LogLevel::Level m_level;
 	uint64_t    m_line;
 	std::string m_file;
+	std::string m_func_name;
 	
 	time_t      m_time;
 	std::stringstream m_ss;
@@ -91,17 +132,7 @@ public:
 protected:
 	std::string m_pattern;
 };
-/*
-class LevelFormatItem : public FormatItem {
-public:
-	LevelFormatItem(const std::string& pattern) : FormatItem(pattern) { }
 
-	void
-	format(Event::ptr e, std::stringstream& ss) override {
-		ss << e->getLevel();
-	}
-};
-*/
 #undef xx
 #define xx(C, EventFun)									\
 class C : public FormatItem {							\
@@ -113,6 +144,7 @@ public:													\
 		ss << e->EventFun();							\
 	}													\
 };														\
+
 //
 class StringFormatItem : public FormatItem {
 public: 
@@ -123,6 +155,7 @@ public:
 		ss << m_pattern;
 	}
 };
+
 xx(LevelFormatItem, getLevel)
 xx(LineFormatItem, getLine)
 xx(NewLineFormatItem, getNewLine)
@@ -130,6 +163,8 @@ xx(MessageFormatItem, getMessage)
 xx(TabFormatItem, getTab)
 xx(FileNameFormatItem, getFileName)
 xx(LoggerNameFormatItem, getLoggerName)
+xx(FunctionNameFormatItem, getFuncName)
+xx(SpaceFormatItem, getSpace)
 #undef xx
 // #undef xx  //xx(C, EventFun)
 // 
@@ -220,7 +255,9 @@ class Logger {
 public:
 	typedef std::shared_ptr<Logger> ptr;
 
-	Logger(const std::string& name, const std::string& format = "/s{[}/l/s{]}/tab/s{[}/lm/s{]}/tab/fn/s{::}/ln/s{:}/tab/m") : m_name(name) {
+	Logger(const std::string& name, const std::string& format = 
+		"/s{[}/l/s{]}/sp/s{[}/lm/s{]}/sp/fn/s{::}/func/s{:}/ln/s{}/sp/s{>}/sp/m") 
+		: m_name(name) {
 		m_def_formatter = Formatter::ptr(new Formatter(format));
 		m_def_appandar = Appandar::ptr(new StdoutAppandar);
 	}
@@ -274,32 +311,20 @@ private:
 	Event::ptr m_event;
 };  
 
-/*
-class Log {
-public: 
-    typedef std::shared_ptr<Log> ptr; 
-    
-    Log(); 
-    virtual ~Log();
-	
-	int log(Event::ptr logEvent) {
-		logEvent->debugOut();
+} // namespace system    
+} // namespace tt
 
-		return 0;
-	}
-    
-private: 
-	    
-}; // Log
-*/
-} // namespace ttlog    
 
-static void 
-operator<<(ttlog::Appandar::ptr ap, const std::string& str) {
+static tt::system::Appandar::ptr
+operator<<(tt::system::Appandar::ptr ap, const std::string& str) {
 	ap->appand(str);
+	return ap;
 }
-static ttlog::Logger::ptr logger_system = ttlog::Logger::ptr(new ttlog::Logger("SYSTEM"));
-static ttlog::Logger::ptr logger_root = ttlog::Logger::ptr(new ttlog::Logger("ROOT"));
+
+static tt::system::Logger::ptr 
+	logger_system = tt::system::Logger::ptr(new tt::system::Logger("SYSTEM"));
+static tt::system::Logger::ptr 
+	logger_root = tt::system::Logger::ptr(new tt::system::Logger("ROOT"));
 
 #define DEBUG_SYS LOG_DEBUG(logger_system)
 #define TT_DEBUG LOG_DEBUG(logger_root)

@@ -1,7 +1,8 @@
 #include "File.h"
 #include "util.h"
+#include "Log.h"
 
-using namespace tt::File;
+using namespace tt::system;
 
 const std::string
 Path::getcwd()  {
@@ -128,8 +129,13 @@ Entry::reopen(const std::string& mode) {
 
 	m_stream = fopen(m_path->path().c_str(), mode.c_str());
 	
-	if(m_stream == nullptr) 
-		perror("can^t fopen: ");
+	if(m_stream == nullptr) {
+		TT_DEBUG << "can^t open " 
+			<< m_path->path().c_str() 
+			<< " errmsg: " << strerror(errno)
+			<< "\n";
+	}
+		
 	return nullptr != m_stream;
 }
 
@@ -181,10 +187,11 @@ Entry::setPos(uint64_t pos) {
 
 void
 Entry::init(const std::string& path) {
-	m_stream = nullptr;  //初始值为非0
-	m_pos = { 0 };		 //初始值为非0
+	m_stream = nullptr;  // 初始值为非0
+	m_pos = { 0 };		 // 初始值为非0
 	resetPath(path);
 	m_data = Data::ptr(new Data(m_path->path()));
+
 }
 
 
