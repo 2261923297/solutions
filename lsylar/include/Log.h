@@ -62,7 +62,9 @@ static std::string sp_file(const char* file_name) {
 		))).getSS()					\
 //
 
-#define LOG_DEBUG(logger) LOG_LEVEL(logger, LogLevel::Level::DEBUG) \
+#define LOG_DEBUG(logger) LOG_LEVEL(logger, LogLevel::Level::DEBUG)
+#define LOG_ERROR(logger) LOG_LEVEL(logger, LogLevel::Level::ERROR)
+#define LOG_INFO(logger)  LOG_LEVEL(logger, LogLevel::Level::INFO)
 
 namespace tt {
 namespace system {
@@ -192,7 +194,6 @@ public:
 	std::string generate(Event::ptr e);
 	void initFormatItem(); 
 	void resetFormat(const std::string& format);
-public:
 
 protected:
 
@@ -327,4 +328,7 @@ static tt::system::Logger::ptr
 	logger_root = tt::system::Logger::ptr(new tt::system::Logger("ROOT"));
 
 #define DEBUG_SYS LOG_DEBUG(logger_system)
+#define ERROR_SYS LOG_ERROR(logger_system)
+#define INFO_SYS LOG_INFO(logger_system)
+
 #define TT_DEBUG LOG_DEBUG(logger_root)

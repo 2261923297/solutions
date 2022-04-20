@@ -3,7 +3,7 @@
 clear
 
 src_name=$1
-root=~/cpp/solutions/lsylar/
+root=~/cpp/solutions/ltensorflow/
 
 bin=$root\bin/
 inc=$root\include/
@@ -24,25 +24,17 @@ rm $exe_file
 
 #create lib.so
 g++ $src_file					\
--std=c++2a                      \
 -I $inc							\
 -L $lib							\
--l Log                          \
--l Socket                       \
--l pthread                      \
 -Wl,-rpath $lib					\
 -fPIC -shared					\
 -o $lib_file
 
 #create test.o
 g++ $test_file					\
--std=c++2a                      \
 -g								\
 -I $inc							\
 -L $lib							\
--l Log                          \
--l Socket                       \
--l pthread                      \
 -Wl,-rpath $lib					\
 -l $src_name					\
 -o $exe_file

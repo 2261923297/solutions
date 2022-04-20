@@ -25,8 +25,6 @@ Event::debugOut()  {
 		<< "\t" << m_ss.str() << std::endl;
 }
 
-
-
 void 
 Formatter::resetFormat(const std::string& format) {
 	setFormat(format);

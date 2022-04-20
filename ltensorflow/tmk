@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cmd=$1
+project_name=$2
+
+if [ "$cmd" = "vim" ];
+then
+	vim -On include/$project_name.h src/$project_name.cc
+elif [ "$cmd" = "mk" ];
+then
+	mk/build_scripts $project_name
+fi

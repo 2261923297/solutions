@@ -23,7 +23,6 @@ public:
 	void add_func(task_t cb, void* args);
 	void start();
 	void stop();
-	
 	void run();  
 
 private:

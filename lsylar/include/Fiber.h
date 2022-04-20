@@ -6,7 +6,16 @@
 #include <string>
 #include <functional>
 #include <ucontext.h>
-
+/**
+ *		每个协程都有一个主协程, 负责调度子协程, 
+ *		子协程只能执行完毕回到主协程
+ *
+ * */
+/**
+ *		持久性的学习
+ *		封装学了没有地方用到
+ *		封装一个log 用于调试， 知识的连贯性，可用性， 可持续性 
+ * */
 namespace tt { 
 namespace system {
 
@@ -20,16 +29,7 @@ public:
 private:
 	
 }; // class MallocStackAllocator	
-/**
- *		每个协程都有一个主协程, 负责调度子协程, 
- *		子协程只能执行完毕回到主协程
- *
- * */
-/**
- *		持久性的学习
- *		封装学了没有地方用到
- *		封装一个log 用于调试， 知识的连贯性，可用性， 可持续性 
- * */
+
 class scheduler;
 class Fiber : public std::enable_shared_from_this<Fiber> { 
 public: 

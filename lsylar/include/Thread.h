@@ -46,7 +46,7 @@ public:
 
 protected:
 private:
-	Thread(Thread&);
+	Thread(const Thread&);
 	Thread(Thread&&);
 	Thread& operator=(Thread&);
 	Thread& operator=(Thread&&);	

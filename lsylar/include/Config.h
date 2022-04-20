@@ -132,6 +132,7 @@ protected:
 	static config_map_t s_datas;
 	static mutex_t s_mutex;
 }; // Config
+
 } // namespace system
 } // namespcae tt 
 
