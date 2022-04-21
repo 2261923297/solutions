@@ -24,24 +24,22 @@ rm $exe_file
 
 #create lib.so
 g++ $src_file					\
--std=c++2a                      \
 -I $inc							\
 -L $lib							\
--l Log                          \
--l Socket                       \
 -l pthread                      \
+-l Log				\
+-l Socket			\
 -Wl,-rpath $lib					\
 -fPIC -shared					\
 -o $lib_file
 
 #create test.o
 g++ $test_file					\
--std=c++2a                      \
 -g								\
 -I $inc							\
 -L $lib							\
--l Log                          \
--l Socket                       \
+-l Log							\
+-l Socket			\
 -l pthread                      \
 -Wl,-rpath $lib					\
 -l $src_name					\
