@@ -103,15 +103,39 @@ void test_conn_till() {
             TT_DEBUG << "connected " << n_conn 
                 << "k ... time_cost " << end - start << "ms";
             start = end;
+            
         }
+
+        if(n_conn == 20480) {
+                break; 
+        }
+
+      
     }
+    while(1) {
+        sleep(1);
+    }
+}
+
+int get_sock_buffer_size() {
+    int defRcvBufSize = -1;
+     socklen_t optlen = sizeof(defRcvBufSize);
+     tt::system::Socket s;
+     s.init_udp();
+     if (getsockopt(s.get_sockfd(), SOL_SOCKET, SO_RCVBUF, &defRcvBufSize, &optlen) < 0)
+     {
+         printf("getsockopt error=%d(%s)!!!\n", errno, strerror(errno));
+         return 0;
+     }
+     return defRcvBufSize;
 }
 int main(int argc, char** argv) {
     if(argc < 2) {
-//        TT_DEBUG << "EchoServer: ";
+        TT_DEBUG << "EchoServer: ";
 //        test_base();
 //        test_udp_echo_server();
         test_conn_till();
+//        TT_DEBUG << get_sock_buffer_size();
     } else {
         TT_DEBUG << "SendClient: ";
         test_client();

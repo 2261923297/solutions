@@ -25,7 +25,7 @@
 	xx(LogLevel::Level::INFO)  \
 	xx(LogLevel::Level::DEBUG) \
 //
-#include "../../include/EnumReflection.h"
+#include "EnumReflection.h"
 
 
 
