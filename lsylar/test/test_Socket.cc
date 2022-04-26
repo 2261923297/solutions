@@ -46,7 +46,7 @@ void test_base() {
 }
 void test_client() {
     Socket::ptr conn_client(new Socket);
-    conn_client->init_tcp(IP, 7890);
+    conn_client->init_tcp(IP, 0);
     conn_client->connect(IP, 7788);
     char buffer[128] = { 0 };
     std::string say_world = "Hello, profect Socket!";
@@ -102,7 +102,7 @@ void test_conn_till() {
         uint64_t end = cur_time_ms();
         if(n_conn % 1024 == 0) {
             TT_DEBUG << "connected " << n_conn 
-                << "k ... time_cost " << end - start << "ms";
+                << " ... time_cost " << end - start << "ms";
             start = end;
             
         }
@@ -134,9 +134,9 @@ int main(int argc, char** argv) {
     if(argc < 2) {
         TT_DEBUG << "EchoServer: ";
 //        test_base();
+        test_client();
 //        test_udp_echo_server();
-//
-        test_conn_till();
+//        test_conn_till();
 //        TT_DEBUG << get_sock_buffer_size();
     } else {
         TT_DEBUG << "SendClient: ";

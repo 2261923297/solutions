@@ -142,7 +142,7 @@ bool PosixSocketApi::connect(Address::ptr addr) {
     IPAddress* ip_addr = (IPAddress*)addr.get();
     sockaddr* sock_in = (sockaddr*)ip_addr->get_addr_st();
     rt = ::connect(m_sock, sock_in, sizeof(*sock_in)) != SOCKET_ERROR;
-
+	
     return rt;
 }
 bool PosixSocketApi::accept(socket_desc_t& ans, uint32_t toBlock) {
@@ -243,6 +243,12 @@ void Socket::dump_local() {
     } 
 }
 
+Socket::Socket(int fd)
+{
+    m_posix_api = PosixSocketApi::ptr(new TcpSocketApi);
+     if(fd) { set_sockfd(fd); } 
+}
+
 bool Socket::init_tcp(const std::string& ip, uint32_t port) {
     bool rt = true;
     // init args;
@@ -250,6 +256,7 @@ bool Socket::init_tcp(const std::string& ip, uint32_t port) {
     ip_local->set_ip(ip);
     ip_local->set_port(port);
     m_error_handler = ErrHandler::ptr(new ErrHandler(this));
+    m_posix_api.reset();
     m_posix_api = PosixSocketApi::ptr(new TcpSocketApi);
     m_local_addr = Address::ptr(ip_local);
 
@@ -409,6 +416,7 @@ bool Socket::recv(void* buffer, size_t& size)
     bool rt = true;
     rt = m_posix_api->recv(buffer, size);
     if(!rt) {
+        TT_DEBUG << "sock = " << this->m_posix_api->m_sock;
         m_error_handler->handle_error(ERR_STR, [this]() {
             this->reconnect();
         }, true);

@@ -1,31 +1,60 @@
 #include "reqpool.h"
-#include <unistd.h>
 #include "Socket.h"
+#include "Log.h"
+#include "util.h"
 
-#define IP "192.168.43.110"
+#include <string.h>
+#include <unistd.h>
+#include <stdint.h>
 
-void test_base() 
+bool pt_recv(void* content, size_t& len, void* context) {
+    bool rt = true;
+    INFO_SYS << "respond: " 
+			<< std::string((const char*)content, 0, len);
+    return rt;
+}
+
+
+void test_base(const char* sv_ip, uint16_t sv_port) 
 {
-    tt::system::Socket::ptr 
-            client_sock(new tt::system::Socket);
-    client_sock->init_tcp(IP, 7890);
-    client_sock->connect(IP, 7788);
-
+    std::string say_word = "hello, reqpoll!";
     asynreq_context ac;
-    asynreq_context_init(&ac);
-    asynreq_commit(&ac, client_sock);
+    asynreq_context_init(&ac, sv_ip, sv_port);
 
-    
+	const size_t bf_size = 1024 * 4;
+	char tmp_buffer[bf_size] = { 0 };
+	size_t n_recv = bf_size;
+
+	uint64_t start_time = cur_time_us();
     while(1) {
-        sleep(1);
-
+		TT_DEBUG << "n_recv: " << n_recv;
+		n_recv = bf_size;
+		uint64_t commit_time = cur_time_us();
+		if(commit_time - start_time >= 100000) {
+			break;
+		}
+		TT_DEBUG << "commit_time_us: " << commit_time;
+        asynreq_commit(
+			&ac
+			, &pt_recv
+			, nullptr
+			, say_word.c_str()
+			, say_word.size()
+			, tmp_buffer
+			, n_recv);
     }
-//    asynreq_context_destory(&ac);
+	while(1) 
+	{
+		sleep(1);
+	}
+    asynreq_context_destory(&ac);
 }
 
 
 int main() {
-    test_base();
+	const char* sv_ip = "192.168.43.110";
+	uint16_t sv_port = 7788;
+    test_base(sv_ip, sv_port);
 
     return 0;
 }

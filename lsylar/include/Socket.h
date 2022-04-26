@@ -123,8 +123,9 @@ public:
 class Socket {
 public:
     using ptr = std::shared_ptr<Socket>;
-    Socket() { }
-    virtual ~Socket() { }
+    Socket(int fd = 0);
+    
+    virtual ~Socket() { close(); }
 
     virtual bool init_tcp(
         const std::string& ip = "0.0.0.0"
@@ -137,6 +138,8 @@ public:
 
     socket_desc_t get_sockfd() const 
         { return m_posix_api->m_sock; }
+    void set_sockfd(socket_desc_t sock)
+        { m_posix_api->m_sock = sock; }
     // 重连等待时间 60s
     bool reconnect(uint64_t nMs = 60000);
     bool close();

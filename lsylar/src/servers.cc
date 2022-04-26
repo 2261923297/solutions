@@ -1,9 +1,11 @@
 #include "servers.h"
 #include "Log.h"
+//#include "reqpool.h"
+#include "Socket.h"
+
 #include <stdio.h>
 #include <sys/epoll.h>
 #include <unistd.h>
-
 #include <sys/socket.h>
 
 int init_fd_item(fd_item_t* item) {
@@ -11,7 +13,6 @@ int init_fd_item(fd_item_t* item) {
 		ERROR_SYS << "param reactor is null";
 		return -1;
 	}
-	
 	item->fd = 0;
 	item->event = 0;
 
@@ -29,6 +30,7 @@ int init_fd_item(fd_item_t* item) {
 
 fd_item_block_t* alloc_fd_item_block(int index) {
 	fd_item_block_t* rt = nullptr;
+	DEBUG_SYS << "alloc block";
 	// malloc fd_item_block
 	rt = (fd_item_block_t*)malloc(sizeof(fd_item_block_t));
 	if(rt == nullptr) {
@@ -61,26 +63,36 @@ void free_fd_item_block_content(fd_item_block_t* block) {
 	block->items = nullptr;
 }
 
-int init_reactor(reactor_t *reactor)
+
+int init_reactor(reactor_t *reactor
+	, BLOCK_ALLOCATOR_FN alloc_fd_item_block_fn
+	, BLOCK_COTENT_DEALLOCATOR_FN block_content_deallocator)
 {
+	// check param
 	if(reactor == nullptr) {
 		ERROR_SYS << "param reactor is null";
 		return -1;
 	}
+	// create listen epoll
 	reactor->listen_epfd = epoll_create(1);
 	if(reactor->listen_epfd == -1) {
 		ERROR_SYS << "can^t epoll_create"
 				<< strerror(errno);
 		return -1;
 	}
+	// create work epoll
 	reactor->work_epfd = epoll_create(1);
 	if(reactor->work_epfd == -1) {
 		ERROR_SYS << "can^t epoll_create"
 				<< strerror(errno);
 		return -1;
 	}
+	// memory ctl init
+	reactor->block_allocator = alloc_fd_item_block_fn;
+	reactor->block_content_deallocator = block_content_deallocator;
 	reactor->nfd = 0;
-	reactor->fd_item_blocks.push_back(alloc_fd_item_block(0));
+	reactor->fd_item_blocks.push_back(reactor->block_allocator(0));
+	
 	return 0;
 }
 
@@ -93,7 +105,7 @@ int destory_reactor(reactor_t* reactor)
 	reactor->nfd = 0;
 
 	for(auto it : reactor->fd_item_blocks) {
-		free_fd_item_block_content(it);
+		reactor->block_content_deallocator(it);
 		free(it);
 	}
 	reactor->fd_item_blocks.clear();
@@ -118,7 +130,7 @@ int add_fd(reactor_t* reactor, int fd)
 		INFO_SYS << "add one block";
 		reactor->
 			fd_item_blocks.push_back
-			(alloc_fd_item_block(i));
+			(reactor->block_allocator(i));
 	}
 	reactor->fd_item_blocks[block_index]->items[block_offset].fd = fd;
 
@@ -154,6 +166,7 @@ fd_item_t* get_fd_item(reactor_t* reactor, int fd)
 }
 
 int listen_loop(reactor_t* reactor) {
+	INFO_SYS << "listen loop start";
 	if(reactor == nullptr) { 
 		ERROR_SYS << "param error";
 		return -1;
@@ -169,6 +182,7 @@ int listen_loop(reactor_t* reactor) {
 			, events
 			, EPOLL_LISTEN_EVENT_SIZE
 			, -1);
+		INFO_SYS << "listen_loop: n_ready = " << n_ready;
 		if(n_ready < 0) {
 			ERROR_SYS << "epoll_wait error"
 					<< strerror(errno);
@@ -180,13 +194,13 @@ int listen_loop(reactor_t* reactor) {
 			fd_item_t* fd_item = get_fd_item(reactor, fd);
 			fd_item->accept_cb(fd, reactor);
 		}
-
 	}
 	return 0;
 }
 
 int work_loop(reactor_t* reactor)
 {
+	INFO_SYS << "work loop start";
 	if(reactor == nullptr) { 
 		ERROR_SYS << "param error";
 		return -1;
@@ -223,46 +237,26 @@ int work_loop(reactor_t* reactor)
 	return 0;
 }
 
-int recv_callback(int fd, void* args) {
-	reactor_t* reactor = (reactor_t*)args;
-	fd_item_t* fd_item = get_fd_item(reactor, fd);
-
-	memset(fd_item->rbuffer, 0, SR_BUFFER_LEN);
-	fd_item->rlen = ::recv(fd, fd_item->rbuffer, SR_BUFFER_LEN, 0);
-	if(fd_item->rlen <= 0) {
-		ERROR_SYS << "cant^t recv err_desc: "
-				<< strerror(errno);
-		epoll_ctl(reactor->work_epfd, EPOLL_CTL_DEL, fd, nullptr);
-		close(fd);
-		del_fd(reactor, fd);
-		return fd_item->rlen;
-	}
-
-	// echo server
-	memcpy(fd_item->sbuffer, fd_item->rbuffer, fd_item->rlen);
-	fd_item->slen = fd_item->rlen;
-	DEBUG_SYS << "what recv: "
-			<< std::string((char*)fd_item->rbuffer, 0, fd_item->rlen);
-	epoll_event ev;
-	ev.data.fd = fd;
-	ev.events = EPOLLOUT | EPOLLET;
-	epoll_ctl(reactor->work_epfd, EPOLL_CTL_MOD, fd, &ev);
-	return 0;
-}
-
 int send_callback(int fd, void* args) {
 	reactor_t* reactor = (reactor_t*)args;
 	fd_item_t* fd_item = get_fd_item(reactor, fd);
 
-	memset(fd_item->rbuffer, 0, SR_BUFFER_LEN);
-	fd_item->slen = ::send(fd, fd_item->sbuffer, fd_item->slen, 0);
+	if(fd_item->slen == 0) { return -2; }
+	tt::system::Socket s(fd);
+	s.send(fd_item->sbuffer, fd_item->slen);
+	TT_DEBUG << "send: " << std::string(
+		(char*)fd_item->sbuffer
+		, 0
+		, fd_item->slen
+	);
 	if(fd_item->slen <= 0) {
-		ERROR_SYS << "cant^t recv";
 		epoll_ctl(reactor->work_epfd, EPOLL_CTL_DEL, fd, nullptr);
-		close(fd);
 		del_fd(reactor, fd);
+		return -1;
+	} else {
+		s.set_sockfd(0);
 	}
-
+	fd_item->slen = 0;
 	// modify recv
 	epoll_event ev;
 	ev.data.fd = fd;
@@ -299,5 +293,61 @@ int accept_callback(int fd, void* args) {
 	add_fd(reactor, client);
 	return 0;
 }
+
+
+int recv_callback(int fd, void* args) 
+{
+	reactor_t* reactor = (reactor_t*)args;
+	fd_item_t* fd_item = get_fd_item(reactor, fd);
+
+	// recv msg
+	memset(fd_item->rbuffer, 0, SR_BUFFER_LEN);
+	fd_item->rlen = SR_BUFFER_LEN;
+	tt::system::Socket s(fd);
+	s.recv(fd_item->rbuffer, fd_item->rlen);
+	
+	if(fd_item->rlen <= 0) {
+		if(fd_item->rlen == SOCKET_ERROR) {
+			ERROR_SYS << "cant^t recv err_desc: "
+					<< strerror(errno);
+		} else {
+	//		INFO_SYS << "sock = " << fd_item->fd 
+	//			<< " closed !";
+		}
+		epoll_ctl(reactor->work_epfd
+				, EPOLL_CTL_DEL
+				, fd
+				, nullptr);
+		del_fd(reactor, fd);
+//		close(fd_item->fd);
+		return fd_item->rlen;
+	} else {
+		// Socket 析构会 close fd
+		s.set_sockfd(0);
+	}
+	DEBUG_SYS << "what recv: "
+			<< std::string((char*)fd_item->rbuffer
+							, 0, fd_item->rlen);
+
+	// echo server
+	memcpy(fd_item->sbuffer
+			, fd_item->rbuffer
+			, fd_item->rlen);
+	fd_item->slen = fd_item->rlen;
+
+	// event move to send
+	epoll_event ev;
+	ev.data.fd = fd;
+	ev.events = EPOLLOUT | EPOLLET;
+	epoll_ctl(reactor->work_epfd
+			, EPOLL_CTL_MOD
+			, fd
+			, &ev);
+
+	return 0;
+}
+
+
+
 
 

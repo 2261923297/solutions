@@ -2,28 +2,32 @@
 #include "Log.h"
 #include "Socket.h"
 #include "util.h"
+
+#include <unistd.h>
 #include <sys/epoll.h>
 #include <errno.h>
-
-bool pt_recv(const void* content, size_t& len) {
-    bool rt = true;
-
-    TT_DEBUG << std::string((const char*)content, len);
-
-    return rt;
-}
+#include <string>
+#include <string.h>
+#include <stdio.h>
 
 bool asynreq_context_init(
     asynreq_context* asynreq_ctx
+	, const char* sv_ip
+	, uint16_t sv_port
 ) 
 {
     bool rt = true;
+    // check param
     if(asynreq_ctx == nullptr) 
     {
         TT_DEBUG << "asyncreq_ctx is null";
         return false;
     } 
 
+	// init member
+	memcpy(asynreq_ctx->server_ip, sv_ip, strlen(sv_ip));
+	asynreq_ctx->server_port = sv_port;
+    // create epoll
     int epfd = epoll_create(1);
     if (epfd < 0) 
     {
@@ -45,100 +49,125 @@ bool asynreq_context_init(
     {
         TT_DEBUG << "pthread_create error!"
                 << strerror(errno);
-        close(epfd);
+        ::close(epfd);
         rt = false;
         return rt;
     }
-    
-    
+	INFO_SYS << "asynchronous request pool will send request to "
+			<< sv_ip << ":"
+			<< sv_port;
     return rt;
 }
 
 
 bool asynreq_commit(
     asynreq_context* asynreq_ctx
-    , tt::system::Socket::ptr client_sock
+	, asynreq_result_cb _cb
+	, void* _cb_context
+    , const void* send_buffer
+    , size_t send_len
+	, void* result_buffer
+	, size_t& result_buffer_len
 )
 {
     bool rt = true;
     // send protocol
-    std::string say_words = "hello, req poll!";
-    size_t n_send = say_words.size();
-    client_sock->send(
-        say_words.c_str()
-        , n_send);
-    // epoll add
-    eparg_t *eparg =
-        (eparg_t*) malloc(sizeof(eparg_t));
-    eparg->fd = client_sock->get_sockfd();
-    eparg->cb = &pt_recv;
+    size_t n_send = send_len;
+	// init tcp
+    tt::system::Socket::ptr req_sock(
+			new tt::system::Socket);
+    req_sock->init_tcp("0.0.0.0", 0);
+    if(!req_sock->connect(
+				asynreq_ctx->server_ip
+				, asynreq_ctx->server_port))
+    {
+        TT_DEBUG << "cant^t connect!";
+        return false;
+    }
+	// send
+    std::string what_send((const char*)send_buffer, send_len);
+    rt = req_sock->send(
+        send_buffer
+        , send_len
+    );
 
+    // init eparg
+    eparg_t *eparg = nullptr;
+    eparg = new eparg_t(
+			req_sock
+			, _cb
+			, _cb_context
+			, result_buffer
+			, result_buffer_len
+			);
+    if(eparg == nullptr) {
+        ERROR_SYS << "memory is run out" 
+                << strerror(errno);
+        return false;
+    }
+    // epoll add
     epoll_event ev;
     ev.data.ptr = eparg;
     ev.events=EPOLLIN | EPOLLET;
-
     int ret = epoll_ctl(
         asynreq_ctx->epfd
         , EPOLL_CTL_ADD
-        , client_sock->get_sockfd()
+        , req_sock->get_sockfd()
         , &ev);
     if(ret == SOCKET_ERROR) {
-        TT_DEBUG << "epoll_ctl: " 
+        ERROR_SYS << "reqpool commit->epoll_ctl: " 
                 << strerror(errno);
+        rt = false;
     } else {
-        TT_DEBUG << "commit sock = "  << client_sock->get_sockfd()
-                << " to epfd = " << asynreq_ctx->epfd;
+
     }
-//    asynreq_callback((void*)asynreq_ctx);
+
     return rt;
-    
 }
 
 void* asynreq_callback(void* cbarg) {
     TT_DEBUG << "asynreq_callback: ";
     asynreq_context* req_ctx = 
         (asynreq_context*)cbarg;
-    epoll_event cur, events[100];
-
-    const size_t bf_size = 1024 * 4;  
-    uint8_t tmp_buffer[bf_size] = { 0 };
+    const int event_size = 100;
+    epoll_event cur, events[event_size];
 
     int nfds = 0;
     eparg_t* eparg = nullptr;
     while(1) {
         // epoll_wait
-        nfds = epoll_wait(req_ctx->epfd, events, 100, 500);
+        nfds = epoll_wait(req_ctx->epfd, events, event_size, -1);
         if(nfds == -1) {
             TT_DEBUG << "epoll wait err"
                     << strerror(errno);
             return NULL;
         }
-
+//        TT_DEBUG << "nfds: " << nfds;
         for(int i = 0; i < nfds; i++) {
             eparg = (eparg_t*)events[i].data.ptr;
-            memset(tmp_buffer, 0, bf_size);
+            memset(eparg->result_buffer, 0, eparg->result_buffer_len);
             // recv
-            size_t n_recv = 
-                ::recv(
-                    eparg->fd
-                    , tmp_buffer
-                    , bf_size
-                    , 0);
-            if(n_recv == SOCKET_ERROR) {
-                TT_DEBUG << "err recv" 
-                        << strerror(errno);
+            if(!eparg->req_sender->recv(
+						eparg->result_buffer
+						, eparg->result_buffer_len)) {
+                ERROR_SYS << "eparg->req_sender cant^t recv data"
+                        << eparg->req_sender.get();
                 continue;
             }
-            // parser
-            eparg->cb(tmp_buffer, n_recv);
-            
-            // delete fd
+			TT_DEBUG << "recv_time_us: " 
+					<< cur_time_us();
+		    // 将fd 从epoll中移除
             epoll_ctl(
                 req_ctx->epfd
                 , EPOLL_CTL_DEL
-                , eparg->fd
+                , eparg->req_sender->get_sockfd()
                 , 0);
-            free(eparg);
+            // parser and other
+            eparg->cb(
+					eparg->result_buffer
+					, eparg->result_buffer_len
+					, eparg->cb_context);
+            delete eparg;
         }
     }
     return nullptr;
@@ -153,6 +182,5 @@ bool asynreq_context_destory(
     close(asynreq_ctx->epfd);
     // cancel thid
     pthread_cancel(asynreq_ctx->thid);
-
     return rt;
 }
