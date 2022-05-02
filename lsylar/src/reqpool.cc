@@ -85,12 +85,12 @@ bool asynreq_commit(
         return false;
     }
 	// send
-    std::string what_send((const char*)send_buffer, send_len);
+	/*
     rt = req_sock->send(
         send_buffer
         , send_len
     );
-
+	*/
     // init eparg
     eparg_t *eparg = nullptr;
     eparg = new eparg_t(
@@ -154,8 +154,8 @@ void* asynreq_callback(void* cbarg) {
                         << eparg->req_sender.get();
                 continue;
             }
-			TT_DEBUG << "recv_time_us: " 
-					<< cur_time_us();
+//			TT_DEBUG << "recv_time_us: " 
+//					<< cur_time_us();
 		    // 将fd 从epoll中移除
             epoll_ctl(
                 req_ctx->epfd

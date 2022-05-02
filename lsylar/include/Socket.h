@@ -26,6 +26,8 @@ public:
     virtual void set_addr(const void* addr) = 0;
     virtual void* get_addr_st() = 0;
 
+	virtual void update_addr() = 0;
+
     virtual void dump() { 
         std::string str;
         to_string(str);
@@ -42,14 +44,19 @@ public:
     virtual ~IPAddress() { }
 
     virtual void to_string(std::string& str) const = 0;
+	// copy init m_ip m_port
     virtual void set_addr(const void* addr) = 0;
+	// init m_addr from m_ip m_port
     virtual void* get_addr_st() = 0;
 
-    void set_port(uint32_t port) { m_port = port; }
-    void set_ip(const std::string& ip) { m_ip = ip; }
+    virtual void set_port(uint32_t port) = 0; 
+    virtual void set_ip(const std::string& ip) = 0;
 
     const std::string& get_ip() const { return m_ip; }
     uint32_t get_port() const { return m_port; }
+
+	virtual void update_addr() = 0;
+
 protected:
     std::string m_ip;
     uint32_t    m_port;
@@ -59,10 +66,17 @@ protected:
 
 class IPv4Address : public IPAddress {
 public:
+	IPv4Address();
     ~IPv4Address() { }
     virtual void to_string(std::string& str) const override;
+
     virtual void set_addr(const void* addr) override;
     virtual void* get_addr_st() override;
+
+    virtual void set_port(uint32_t port) override; 
+    virtual void set_ip(const std::string& ip) override;
+
+	virtual void update_addr() override;
 private:
     sockaddr_in m_addr;
 };
@@ -136,6 +150,11 @@ public:
         , uint32_t port = 7788
         );
 
+	void set_local_addr(Address::ptr local) { m_local_addr = local; }
+	void set_remote_addr(Address::ptr remote) { m_remote_addr = remote; }
+	
+
+
     socket_desc_t get_sockfd() const 
         { return m_posix_api->m_sock; }
     void set_sockfd(socket_desc_t sock)
@@ -153,10 +172,10 @@ public:
     bool recv(void* buffer, size_t& n_recv);
     bool sendto(const void* buffer
         , size_t& n_send
-        , void* addr = nullptr);
+        , Address::ptr addr = nullptr);
     bool recvfrom(void* buffer
         , size_t& n_recv
-        , void* addr = nullptr);
+        , Address::ptr addr = nullptr);
     
     void dump_remote();
     void dump_local();
@@ -165,6 +184,7 @@ protected:
     ErrHandler::ptr m_error_handler;
     Address::ptr m_remote_addr;
     Address::ptr m_local_addr;
+
 
 };  // class Socket
 

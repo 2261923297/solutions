@@ -14,7 +14,7 @@ int init_fd_item(fd_item_t* item) {
 		return -1;
 	}
 	item->fd = 0;
-	item->event = 0;
+	item->sock_type = SOCK_STREAM;
 
 	item->recv_cb = &recv_callback;
 	item->send_cb = &send_callback;
@@ -133,9 +133,7 @@ int add_fd(reactor_t* reactor, int fd)
 			(reactor->block_allocator(i));
 	}
 	reactor->fd_item_blocks[block_index]->items[block_offset].fd = fd;
-
 	reactor->nfd++; 
-	
 	return 0;
 }
 
@@ -182,7 +180,7 @@ int listen_loop(reactor_t* reactor) {
 			, events
 			, EPOLL_LISTEN_EVENT_SIZE
 			, -1);
-		INFO_SYS << "listen_loop: n_ready = " << n_ready;
+//		INFO_SYS << "listen_loop: n_ready = " << n_ready;
 		if(n_ready < 0) {
 			ERROR_SYS << "epoll_wait error"
 					<< strerror(errno);
@@ -198,6 +196,32 @@ int listen_loop(reactor_t* reactor) {
 	return 0;
 }
 
+int reactor_add_listener(
+		reactor_t* reactor
+		, const char* ip
+		, uint16_t port) 
+{
+	
+	if(reactor == nullptr) 
+	{
+		ERROR_SYS << "param error, reactor = nullptr";
+		return -1;
+	}
+	tt::system::Socket listenfd;
+	TT_DEBUG << "add listener ip: " << ip
+			<< ", listen_port: " << port;
+	listenfd.init_tcp(ip, port);
+	listenfd.listen(1024 * 1024);
+
+	epoll_event ev;
+	ev.events = EPOLLIN;
+	ev.data.fd = listenfd.get_sockfd();
+	epoll_ctl(reactor->listen_epfd, EPOLL_CTL_ADD, ev.data.fd, &ev);
+	add_fd(reactor, listenfd.get_sockfd());
+	listenfd.set_sockfd(0);
+
+	return 0;
+}
 int work_loop(reactor_t* reactor)
 {
 	INFO_SYS << "work loop start";
@@ -244,11 +268,13 @@ int send_callback(int fd, void* args) {
 	if(fd_item->slen == 0) { return -2; }
 	tt::system::Socket s(fd);
 	s.send(fd_item->sbuffer, fd_item->slen);
+	/*
 	TT_DEBUG << "send: " << std::string(
 		(char*)fd_item->sbuffer
 		, 0
 		, fd_item->slen
 	);
+	*/
 	if(fd_item->slen <= 0) {
 		epoll_ctl(reactor->work_epfd, EPOLL_CTL_DEL, fd, nullptr);
 		del_fd(reactor, fd);
@@ -292,6 +318,7 @@ int accept_callback(int fd, void* args) {
         , &ev);
 	add_fd(reactor, client);
 	return 0;
+
 }
 
 
@@ -325,10 +352,11 @@ int recv_callback(int fd, void* args)
 		// Socket 析构会 close fd
 		s.set_sockfd(0);
 	}
+	/*
 	DEBUG_SYS << "what recv: "
 			<< std::string((char*)fd_item->rbuffer
 							, 0, fd_item->rlen);
-
+	*/
 	// echo server
 	memcpy(fd_item->sbuffer
 			, fd_item->rbuffer

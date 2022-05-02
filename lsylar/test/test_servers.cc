@@ -16,8 +16,9 @@ void test_echo_server() {
 	std::thread listen_thrd(listen_loop, &reactor);
 	std::thread work_thrd(work_loop, &reactor);
 
+/*
 	tt::system::Socket listenfd;
-	const char* listen_ip = "192.168.43.110";
+	const char* listen_ip = "192.168.90.1";
 	uint16_t    listen_port = 8888;
 	TT_DEBUG << "listen_ip: " << listen_ip
 			<< ", listen_port: " << listen_port;
@@ -29,7 +30,13 @@ void test_echo_server() {
 	ev.data.fd = listenfd.get_sockfd();
 	epoll_ctl(reactor.listen_epfd, EPOLL_CTL_ADD, ev.data.fd, &ev);
 	add_fd(&reactor, listenfd.get_sockfd());
-
+*/
+	// add n_listener 
+	int n_listener = 100;
+	for(int i = 0; i < n_listener; i++)
+	{
+		reactor_add_listener(&reactor, PW_SERVER_IP, 8800 + i);
+	}
 	listen_thrd.join();
 	work_thrd.join();
 }
@@ -75,6 +82,7 @@ void test_conn_1000k() {
 	listen_loop(&reactor);
 }
 
+int udp_echo_server_recv();
 int main() {
 	test_echo_server();
 

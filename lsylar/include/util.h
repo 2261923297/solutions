@@ -19,7 +19,7 @@ static inline uint64_t cur_time_us();
 	} while(0);												\
 
 //
-
+#define str_val(val) #val << " = " << val
 
 #define print_val(val, format) \
 	printf("[info] %s:%d %s = %" #format "\n", __FILE__, __LINE__, #val, val);

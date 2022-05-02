@@ -9,13 +9,16 @@
 
 bool pt_recv(void* content, size_t& len, void* context) {
     bool rt = true;
-    INFO_SYS << "respond: " 
-			<< std::string((const char*)content, 0, len);
+//    INFO_SYS << "respond: " 
+//			<< std::string((const char*)content, 0, len);
     return rt;
 }
 
 
-void test_base(const char* sv_ip, uint16_t sv_port) 
+void test_base(
+		const char* sv_ip
+		, uint16_t sv_port
+		, size_t n_port) 
 {
     std::string say_word = "hello, reqpoll!";
     asynreq_context ac;
@@ -26,14 +29,13 @@ void test_base(const char* sv_ip, uint16_t sv_port)
 	size_t n_recv = bf_size;
 
 	uint64_t start_time = cur_time_us();
+	uint32_t n_commit = 0;
+	const uint64_t want_commit = 20 * 1000;
     while(1) {
-		TT_DEBUG << "n_recv: " << n_recv;
+//		TT_DEBUG << "n_recv: " << n_recv;
 		n_recv = bf_size;
-		uint64_t commit_time = cur_time_us();
-		if(commit_time - start_time >= 100000) {
-			break;
-		}
-		TT_DEBUG << "commit_time_us: " << commit_time;
+
+//		TT_DEBUG << "commit_time_us: " << commit_time;
         asynreq_commit(
 			&ac
 			, &pt_recv
@@ -42,7 +44,15 @@ void test_base(const char* sv_ip, uint16_t sv_port)
 			, say_word.size()
 			, tmp_buffer
 			, n_recv);
+		n_commit ++;
+		if(n_commit >= want_commit) break;
     }
+	TT_DEBUG << str_val(n_commit); 
+
+	uint64_t commit_time = cur_time_us();
+	uint64_t cost_time = commit_time - start_time;
+	TT_DEBUG << str_val(cost_time);
+
 	while(1) 
 	{
 		sleep(1);
@@ -51,10 +61,11 @@ void test_base(const char* sv_ip, uint16_t sv_port)
 }
 
 
-int main() {
-	const char* sv_ip = "192.168.43.110";
-	uint16_t sv_port = 7788;
-    test_base(sv_ip, sv_port);
-
+int main() 
+{
+	const char* sv_ip = "192.168.90.1";
+	uint16_t sv_port = 8888;
+	
+	test_base(sv_ip, sv_port, 100);
     return 0;
 }
