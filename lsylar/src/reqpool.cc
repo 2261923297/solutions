@@ -60,7 +60,8 @@ bool asynreq_context_init(
 }
 
 
-bool asynreq_commit(
+
+bool asynreq_commit_udp(
     asynreq_context* asynreq_ctx
 	, asynreq_result_cb _cb
 	, void* _cb_context
@@ -76,21 +77,21 @@ bool asynreq_commit(
 	// init tcp
     tt::system::Socket::ptr req_sock(
 			new tt::system::Socket);
-    req_sock->init_tcp("0.0.0.0", 0);
-    if(!req_sock->connect(
-				asynreq_ctx->server_ip
-				, asynreq_ctx->server_port))
-    {
-        TT_DEBUG << "cant^t connect!";
-        return false;
-    }
+    req_sock->init_udp(
+			"0.0.0.0"
+			, 0);
+	tt::system::IPAddress::ptr 
+		remote(new tt::system::IPv4Address);
+	remote->set_ip(asynreq_ctx->server_ip);
+	remote->set_port(asynreq_ctx->server_port);
+	req_sock->set_remote_addr(remote);
+
+//	TT_DEBUG << "will send";
 	// send
-	/*
     rt = req_sock->send(
         send_buffer
         , send_len
     );
-	*/
     // init eparg
     eparg_t *eparg = nullptr;
     eparg = new eparg_t(
@@ -121,10 +122,72 @@ bool asynreq_commit(
     } else {
 
     }
-
     return rt;
 }
 
+bool asynreq_commit(
+    asynreq_context* asynreq_ctx
+	, asynreq_result_cb _cb
+	, void* _cb_context
+    , const void* send_buffer
+    , size_t send_len
+	, void* result_buffer
+	, size_t& result_buffer_len
+)
+{
+    bool rt = true;
+    // send protocol
+    size_t n_send = send_len;
+	// init tcp
+    tt::system::Socket::ptr req_sock(
+			new tt::system::Socket);
+    req_sock->init_tcp("0.0.0.0", 0);
+    if(!req_sock->connect(
+				asynreq_ctx->server_ip
+				, asynreq_ctx->server_port))
+    {
+        TT_DEBUG << "cant^t connect!";
+        return false;
+    }
+	// send
+    rt = req_sock->send(
+        send_buffer
+        , send_len
+    );
+    // init eparg
+    eparg_t *eparg = nullptr;
+    eparg = new eparg_t(
+			req_sock
+			, _cb
+			, _cb_context
+			, result_buffer
+			, result_buffer_len
+			);
+    if(eparg == nullptr) {
+        ERROR_SYS << "memory is run out" 
+                << strerror(errno);
+        return false;
+    }
+    // epoll add
+    epoll_event ev;
+    ev.data.ptr = eparg;
+    ev.events=EPOLLIN | EPOLLET;
+    int ret = epoll_ctl(
+        asynreq_ctx->epfd
+        , EPOLL_CTL_ADD
+        , req_sock->get_sockfd()
+        , &ev);
+    if(ret == SOCKET_ERROR) {
+        ERROR_SYS << "reqpool commit->epoll_ctl: " 
+                << strerror(errno);
+        rt = false;
+    } else {
+
+    }
+    return rt;
+}
+
+static uint64_t rcount = 0;
 void* asynreq_callback(void* cbarg) {
     TT_DEBUG << "asynreq_callback: ";
     asynreq_context* req_ctx = 
@@ -154,8 +217,8 @@ void* asynreq_callback(void* cbarg) {
                         << eparg->req_sender.get();
                 continue;
             }
-//			TT_DEBUG << "recv_time_us: " 
-//					<< cur_time_us();
+//			TT_DEBUG << "recv_time_us: " << cur_time_us();
+
 		    // 将fd 从epoll中移除
             epoll_ctl(
                 req_ctx->epfd
@@ -169,6 +232,13 @@ void* asynreq_callback(void* cbarg) {
 					, eparg->cb_context);
             delete eparg;
         }
+		rcount += nfds;
+#if 0
+		if(rcount % 1024 == 0)
+		{
+			TT_DEBUG << str_val(rcount);
+		}
+#endif
     }
     return nullptr;
 }

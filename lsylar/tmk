@@ -9,5 +9,5 @@ then
 	vim -On include/$project_name.h test/test_$project_name.cc
 elif [ "$cmd" = "mk" ];
 then
-	mk/build_scripts $project_name
+	./mk/build_scripts $project_name
 fi

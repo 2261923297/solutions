@@ -27,7 +27,8 @@ void test_in_run() {
     
 int main() {
 	DEBUG_SYS << "test tt_debug";
-    std::cout << "Hello, test Log base!" << std::endl;
+	TT_DEBUG << "ttt";
+	INFO_SYS << "tttttt";
     test_shared_ptr();
     
     return 0;

@@ -15,14 +15,14 @@
 #define ENUM_NAME Level
 
 #define ENUM_BODY \
-	ENUM_MESSAGE(Level, FATAL, ERROR, WARN, INFO, DEBUG)
+	ENUM_MESSAGE(Level, FATAL, ERROR, WARN_, INFO_, DEBUG)
 
 // map<str, enum> 
 #define ENUM_VALUES \
 	xx(LogLevel::Level::FATAL) \
 	xx(LogLevel::Level::ERROR) \
-	xx(LogLevel::Level::WARN)  \
-	xx(LogLevel::Level::INFO)  \
+	xx(LogLevel::Level::WARN_)  \
+	xx(LogLevel::Level::INFO_)  \
 	xx(LogLevel::Level::DEBUG) \
 //
 #include "EnumReflection.h"
@@ -64,7 +64,7 @@ static std::string sp_file(const char* file_name) {
 
 #define LOG_DEBUG(logger) LOG_LEVEL(logger, LogLevel::Level::DEBUG)
 #define LOG_ERROR(logger) LOG_LEVEL(logger, LogLevel::Level::ERROR)
-#define LOG_INFO(logger)  LOG_LEVEL(logger, LogLevel::Level::INFO)
+#define LOG_INFO(logger)  LOG_LEVEL(logger, LogLevel::Level::INFO_)
 
 namespace tt {
 namespace system {
@@ -101,7 +101,7 @@ public:
 	getNewLine() const { return "\n"; }
 
 	const std::string
-	getMessage() const { return m_ss.str(); }
+	getMessage() const;
 	void 
 	debugOut();
 
@@ -257,8 +257,11 @@ public:
 	typedef std::shared_ptr<Logger> ptr;
 
 	Logger(const std::string& name, const std::string& format = 
-		"/s{[}/l/s{]}/sp/s{[}/lm/s{]}/sp/fn/s{::}/func/s{:}/ln/s{}/sp/s{>}/sp/m") 
-		: m_name(name) {
+		"/s{[}/l/s{]}/sp"
+		"/s{[}/lm/s{]}/sp"
+		"/s{>}/sp/m/tab"
+		"/ln/s{:}/func/s{::}/fn"
+	)  : m_name(name) {
 		m_def_formatter = Formatter::ptr(new Formatter(format));
 		m_def_appandar = Appandar::ptr(new StdoutAppandar);
 	}
@@ -325,7 +328,7 @@ operator<<(tt::system::Appandar::ptr ap, const std::string& str) {
 static tt::system::Logger::ptr 
 	logger_system = tt::system::Logger::ptr(new tt::system::Logger("SYSTEM"));
 static tt::system::Logger::ptr 
-	logger_root = tt::system::Logger::ptr(new tt::system::Logger("ROOT"));
+	logger_root = tt::system::Logger::ptr(new tt::system::Logger  ("ROOT__"));
 
 #define DEBUG_SYS LOG_DEBUG(logger_system)
 #define ERROR_SYS LOG_ERROR(logger_system)

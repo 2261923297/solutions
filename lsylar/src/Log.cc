@@ -25,6 +25,13 @@ Event::debugOut()  {
 		<< "\t" << m_ss.str() << std::endl;
 }
 
+const std::string
+Event::getMessage() const  {
+	std::string rt = m_ss.str();
+	const int fmt_size = 56;
+	int n_space = fmt_size  * (rt.size() / fmt_size + 1) - rt.size();
+	return rt + std::string(n_space, ' ');
+}
 void 
 Formatter::resetFormat(const std::string& format) {
 	setFormat(format);

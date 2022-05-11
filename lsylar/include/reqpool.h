@@ -83,6 +83,7 @@ struct asynreq_context {
 
 // epoll wait & cbarg->result_sender->send(tmp_buffer)
 void* asynreq_callback(void* cbarg);
+
 // func create req_sock & req_sock->send(send_buffer, send_len);
 bool asynreq_commit(
 			asynreq_context* asyncreq_ctx
@@ -92,7 +93,19 @@ bool asynreq_commit(
             , size_t request_send_len
 			, void* result_buffer
 			, size_t& result_buffer_len);
+
+// func create req_sock & req_sock->send(send_buffer, send_len);
+bool asynreq_commit_udp(
+			asynreq_context* asyncreq_ctx
+			, asynreq_result_cb _cb
+			, void* _cb_context
+            , const void* request_send_buffer
+            , size_t request_send_len
+			, void* result_buffer
+			, size_t& result_buffer_len);
+
 // sv_ip: get req from server which ip == sv_ip
+//
 bool asynreq_context_init(asynreq_context* asynreq_ctx
 		, const char* sv_ip = IP
 		, uint16_t sv_port = 7788

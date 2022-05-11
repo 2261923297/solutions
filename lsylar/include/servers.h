@@ -1,4 +1,7 @@
+
 #pragma once
+#include "Socket.h"
+
 #include <sys/epoll.h>
 #include <string>
 #include <stdint.h>
@@ -21,7 +24,8 @@ typedef struct __st_fd_item {
     int fd;
     int sock_type;
 
-    NET_EVENT_CB recv_cb;
+//	tt::system::Address::ptr remote_addr;
+	NET_EVENT_CB recv_cb;
     NET_EVENT_CB send_cb;
     NET_EVENT_CB accept_cb;
 
@@ -77,38 +81,15 @@ int destory_reactor(reactor_t* reactor);
 int work_loop(reactor_t* reactor);
 // only listen
 int listen_loop(reactor_t* reactor);
-/*
+
 int reactor_add_udp_server(
 		reactor_t* reactor
 		, const char* ip
 		, uint16_t port
 		, NET_EVENT_CB recv_cb
 		, NET_EVENT_CB send_cb
-)
-{
-	tt::system::Socket udp_sock;
-	udp_sock.init_udp(ip, port);
+);
 
-	fd_item_t* fd_item = get_fd_item(udp_sock.get_sockfd());
-	fd_item->fd = udp_sock.get_sockfd();
-	fd_item->recv_cb = recv_cb;
-	fd_item->send_cv = send_cb;
-
-	// add to work_epfd
-	epoll_event ev;
-    ev.data.fd = udp_sock.get_sockfd();
-    ev.events = EPOLLIN | EPOLLET;
-    int ret = epoll_ctl(
-        reactor->work_epfd
-        , EPOLL_CTL_ADD
-        , udp_sock.get_sockfd()
-        , &ev);
-	add_fd(reactor, udp_sock.get_sockfg());
-	return 0;
-
-
-}
-*/
 int reactor_add_listener(
 		reactor_t* reactor
 		, const char* ip
@@ -120,10 +101,6 @@ int accept_callback(int fd, void* args);
 int recv_callback(int fd, void* args);
 int send_callback(int fd, void* args);
 
-
 // rpcapi server callback
 int rpcapi_recv_callback(int fd, void* args);
-
-
-
 

@@ -14,12 +14,12 @@
 #include "Log.h"
 #include "Socket.h"
 
-#define ERR_STR std::string("[ERROR]  ")         \
+#define ERR_STR std::string("[ERROR]  ")		\
     + sp_file(__FILE__) + ":"                   \
-    + std::to_string(__LINE__) + "  "            \
+    + std::to_string(__LINE__) + "  "           \
     + __FUNCTION__ + " > "                      \
+	+ "sock_fd = " + std::to_string(this->get_sockfd()) + "  "		\
     + strerror(errno)                           \
-    + "\n"                                      \
 //
 
 namespace tt {
@@ -168,6 +168,9 @@ bool PosixSocketApi::accept(socket_desc_t& ans, uint32_t toBlock) {
     TT_DEBUG << "client sock = " << client;
     return rt;
 }
+
+/*
+ 
 bool PosixSocketApi::send(const void* buffer, size_t& n_send) {
     bool rt = true;
     n_send = ::send(m_sock, buffer, n_send, 0);
@@ -187,31 +190,59 @@ bool PosixSocketApi::sendto(
     , void*     addr
     ) 
 {
-    bool rt = true;
-    n_send = ::sendto(m_sock
-        , buffer
-        , n_send
-        , 0
-        , (struct sockaddr*)addr
-        , sizeof(sockaddr_in)
-        );
-    rt = n_send != SOCKET_ERROR;
-    return rt;
+
 }
+
 bool PosixSocketApi::recvfrom(
     void*       buffer
     , size_t&   n_recv
     , void*     addr) 
 {
+
+}
+*/
+ 
+bool TcpSocketApi::send(const void* buffer, size_t& n_send) {
+    bool rt = true;
+    n_send = ::send(m_sock, buffer, n_send, 0);
+    rt = n_send != SOCKET_ERROR;
+    return rt;
+}
+bool TcpSocketApi::recv(void* buffer, size_t& n_recv) {
+    bool rt = true;
+    n_recv = ::recv(m_sock, buffer, n_recv, 0);
+    rt = n_recv != SOCKET_ERROR;
+    return rt;
+}
+
+
+bool UdpSocketApi::send(const void* buffer, size_t& n_send) {
+    bool rt = true;
+//	INFO_SYS << "send: ";
+	struct sockaddr* sa =  (struct sockaddr*)m_caller->m_remote_addr->get_addr_st();
+//	m_caller->dump_remote();
+//	TT_DEBUG << m_caller->get_sockfd();
+    n_send = ::sendto(m_sock
+        , buffer
+        , n_send
+        , 0
+		, sa
+        , sizeof(sockaddr_in)
+        );
+    rt = n_send != SOCKET_ERROR;
+    return rt;
+}
+bool UdpSocketApi::recv(void* buffer, size_t& n_recv) {
     bool rt = true;
     socklen_t len = sizeof(sockaddr*);
-	struct sockaddr_in* sin = (struct sockaddr_in*)addr;
+	struct sockaddr_in* sin 
+		= (struct sockaddr_in*)m_caller->m_remote_addr->get_addr_st();
 	memset(buffer, 0, n_recv);
     n_recv = ::recvfrom(m_sock
         , buffer
         , n_recv
         , 0
-        , (struct sockaddr*)addr
+        , (struct sockaddr*)sin
         , &len
         );
     rt = n_recv != SOCKET_ERROR;
@@ -230,25 +261,26 @@ bool TcpSocketApi::socket(uint32_t toBlock) {
     int on = 1;
     set_reuseaddr(m_sock, on);
     set_reuseport(m_sock, on);
-
+	rt = m_sock != SOCKET_ERROR;
     return rt;
 }
 
 bool UdpSocketApi::socket(uint32_t toBlock) {
     bool rt = true;
     m_sock = ::socket(AF_INET, SOCK_DGRAM, 0);
-    if(m_sock == 0) {
+    if(m_sock == -1) {
         rt = false;
     } else {
         set_fd_mode(m_sock, toBlock);
     }
+	rt = m_sock != SOCKET_ERROR;
     return rt;
 }
 
 void Socket::dump_remote() { 
     if(m_remote_addr) {
 		m_remote_addr->update_addr();
-//        m_remote_addr->dump(); 
+        m_remote_addr->dump(); 
     }
 	else
 	{
@@ -266,12 +298,26 @@ void Socket::dump_local() {
 	}
 }
 
-Socket::Socket(int fd)
+Socket::Socket(int fd, bool is_tcp)
 {
-    m_posix_api = PosixSocketApi::ptr(new TcpSocketApi);
+	if(is_tcp)
+		m_posix_api = PosixSocketApi::ptr(new TcpSocketApi);
+	else {
+		m_posix_api = PosixSocketApi::ptr(new UdpSocketApi(this));
+		m_remote_addr = Address::ptr(new IPv4Address);
+	}
      if(fd) { set_sockfd(fd); } 
 }
 
+bool Socket::socket()
+{
+	bool rt = m_posix_api->socket();
+	if(!rt)
+	{
+        m_error_handler->handle_error(ERR_STR);
+	}
+	return rt;
+}
 bool Socket::init_tcp(const std::string& ip, uint32_t port) {
     bool rt = true;
     // init args;
@@ -279,23 +325,15 @@ bool Socket::init_tcp(const std::string& ip, uint32_t port) {
     ip_local->set_ip(ip);
     ip_local->set_port(port);
     m_error_handler = ErrHandler::ptr(new ErrHandler(this));
-    m_posix_api.reset();
     m_posix_api = PosixSocketApi::ptr(new TcpSocketApi);
     m_local_addr = Address::ptr(ip_local);
 
     // socket
-    rt = m_posix_api->socket();
-    if(!rt) {
-        m_error_handler->handle_error(ERR_STR);
-        return rt;
-    }
+	this->socket();
 
     // bind
-    rt = this->bind(ip, port);
-
-    if(!rt) {
-        m_error_handler->handle_error(ERR_STR);
-    }
+	if(port != 0)
+		this->bind(ip, port);
     return rt;
 }
 
@@ -304,18 +342,14 @@ bool Socket::init_udp(const std::string& ip, uint32_t port) {
     IPv4Address *ip_local = new IPv4Address;
     ip_local->set_ip(ip);
     ip_local->set_port(port);
-
     m_error_handler = ErrHandler::ptr(new ErrHandler(this));
-    m_posix_api = PosixSocketApi::ptr(new UdpSocketApi);
+    m_posix_api = PosixSocketApi::ptr(new UdpSocketApi(this));
     m_local_addr = Address::ptr(ip_local);
     // socket
-    rt = m_posix_api->socket();
-    if(!rt) {
-        m_error_handler->handle_error(ERR_STR);
-        return rt;
-    }
+	this->socket();
     // bind
-    rt = this->bind(ip, port);
+	if(port != 0)
+		rt = this->bind(ip, port);
     return rt;
 }
 
@@ -336,10 +370,14 @@ bool Socket::reconnect(uint64_t nMs) {
     while(clock() - start < nMs) {
         rt = this->connect(m_remote_addr);
         if(rt) {
+			INFO_SYS << "reconnect success";
             break;
         }
     }
-
+	if(!rt)
+	{
+		ERROR_SYS << "cant^t reconnect";
+	}
     return rt;
 }
 bool Socket::bind(const std::string& ip, uint32_t port) {
@@ -357,6 +395,8 @@ bool Socket::bind(Address::ptr local) {
     bool rt = true;
     rt = m_posix_api->bind(local);
     if(!rt) {
+		ERROR_SYS << "bind sock = " 
+			<< this->get_sockfd();
         m_error_handler->handle_error(ERR_STR);
     }else {
         m_local_addr = local;
@@ -368,8 +408,10 @@ bool Socket::bind(Address::ptr local) {
             addr->set_addr(&localaddr);
             m_local_addr = Address::ptr(addr);
         }
+#if 0
 		INFO_SYS << "sock bind: ";
         m_local_addr->dump();
+#endif 
     }
     return rt;
 }
@@ -407,40 +449,57 @@ bool Socket::connect(const std::string& ip, uint32_t port) {
     
     return rt;
 }
+
 bool Socket::connect(Address::ptr addr) {
     bool rt = true;
     rt = m_posix_api->connect(addr);
     if(!rt) {
         m_error_handler->handle_error(ERR_STR, [this]() {
-            this->reconnect();
+			this->dump_remote();
         }, true);
     } else {
         m_remote_addr = addr;
+#if 0
         INFO_SYS << " connect address: ";
         m_remote_addr->dump();
+#endif
     }
 
     return rt;
 }
-bool Socket::send(const void* buffer, size_t& size) {
+
+bool Socket::send(
+		const void* buffer
+		, size_t& size 
+		, Address::ptr addr)
+{
     bool rt = true;
+	if(addr != nullptr) { 
+		m_remote_addr = addr; 
+	}
+//	m_remote_addr->dump();
     rt = m_posix_api->send(buffer, size);
     if(!rt) {
         m_error_handler->handle_error(ERR_STR, [this, buffer, size]() {
-            if(this->reconnect()) {
-
-            }
+			ERROR_SYS << "sock = " 
+				<< this->get_sockfd();
+//            this->reconnect();
         }, true);
     }
-
     return rt;
 }
-bool Socket::recv(void* buffer, size_t& size) 
+
+bool Socket::recv(
+		void* buffer
+		, size_t& size
+		, Address::ptr addr)
 {
     bool rt = true;
+	if(addr != nullptr) { m_remote_addr = addr; }
     rt = m_posix_api->recv(buffer, size);
+
     if(!rt) {
-        TT_DEBUG << "sock = " << this->m_posix_api->m_sock;
+        DEBUG_SYS << "sock = " << this->m_posix_api->m_sock;
         m_error_handler->handle_error(ERR_STR, [this]() {
             this->reconnect();
         }, true);
@@ -448,53 +507,6 @@ bool Socket::recv(void* buffer, size_t& size)
 
     return rt;
 }
-bool Socket::sendto(const void* buffer
-    , size_t& size
-	, Address::ptr addr
-    ) 
-{
-    bool rt = true;
-    if(addr == nullptr) 
-    {
-        addr = m_remote_addr;
-    } 
-	else
-	{
-		m_remote_addr = addr;
-	}
-    rt = m_posix_api->sendto(buffer
-			, size
-			, addr->get_addr_st());
 
-    if(!rt) 
-    {
-        m_error_handler->handle_error(ERR_STR);
-    }
-    return rt;
-}
-bool Socket::recvfrom(void* buffer
-    , size_t& size
-	, Address::ptr addr
-    )
-{
-    bool rt = true;
-    if(addr == nullptr) 
-    {
-        addr = m_remote_addr;
-    }
-	else
-	{
-		m_remote_addr = addr;
-	}
-    rt = m_posix_api->recvfrom(buffer
-			, size
-			, addr->get_addr_st());
-
-    if(!rt) 
-    {
-        m_error_handler->handle_error(ERR_STR);
-    }
-    return rt;
-}
 } // namespace system
 } // namespace tt
