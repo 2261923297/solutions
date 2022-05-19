@@ -187,6 +187,7 @@ bool asynreq_commit(
     return rt;
 }
 
+static uint64_t ltime = 0;
 static uint64_t rcount = 0;
 void* asynreq_callback(void* cbarg) {
     TT_DEBUG << "asynreq_callback: ";
@@ -233,10 +234,15 @@ void* asynreq_callback(void* cbarg) {
             delete eparg;
         }
 		rcount += nfds;
-#if 0
+#if 1
 		if(rcount % 1024 == 0)
 		{
-			TT_DEBUG << str_val(rcount);
+			uint64_t ntime = cur_time_us();
+			ltime = ntime - ltime;
+
+			TT_DEBUG << str_val(rcount)
+				<< " cost: " << ltime << "us";
+			ltime = ntime;
 		}
 #endif
     }

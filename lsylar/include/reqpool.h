@@ -39,7 +39,7 @@
 
 #define IP "192.168.43.110"
 typedef bool (*asynreq_result_cb)(void* content, size_t& len, void* cb_context);
-
+static uint64_t __time = 0;
 
 /*
     shared_ptr 对象的申请不能用malloc

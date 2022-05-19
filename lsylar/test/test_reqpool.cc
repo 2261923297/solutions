@@ -92,7 +92,7 @@ int main()
 #endif
 
 	test_base(sv_ip, sv_udp_port, 100, false);
-	test_base(sv_ip, sv_port, 100, true);
+//	test_base(sv_ip, sv_port, 100, true);
 	while(1) sleep(1);
     return 0;
 }

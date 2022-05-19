@@ -56,7 +56,6 @@ void test_entry() {
 	entry.close();
 	entry.resetData();   // ??????????file_size 刷新不了！！！！
 	entry.getData()->showData();
-
 	
 }
 
