@@ -28,9 +28,7 @@ g++ $src_file					\
 -L $lib							\
 -l pthread                      \
 -l Log				\
--l Socket			\
--l reqpool			\
--l servers			\
+-l File             \
 -Wl,-rpath $lib					\
 -fPIC -shared					\
 -o $lib_file
@@ -40,12 +38,10 @@ g++ $test_file					\
 -g								\
 -I $inc							\
 -L $lib							\
--l Log				\
--l Socket			\
--l reqpool			\
--l servers			\
 -Wl,-rpath $lib					\
 -l pthread                      \
+-l Log				\
+-l File             \
 -Wl,-rpath $lib					\
 -l $src_name					\
 -o $exe_file

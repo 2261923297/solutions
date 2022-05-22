@@ -7,7 +7,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <errno.h>
 
+#include "Log.h"
 
 #define ENUM_CLASS_NAME Platform
 #define ENUM_NAME Type
@@ -104,7 +106,7 @@ public:
 
 	typedef std::shared_ptr<tt::system::Entry> ptr;
 
-	Entry(std::string& path) { init(path);  }
+	Entry(const std::string& path) { init(path);  }
 	Entry(const Path& path) { init(path.path()); }
 	virtual ~Entry() { }
 		
@@ -165,21 +167,15 @@ public:
 			d->reset(dir_ss.str());
 			if(d->exit() && d->isDir()) {
 				continue;
-			}
-			std::cout << "dir: " << dir_ss.str() 
-					<< " is not exit!" << std::endl;
-			break;
-		}
-		if(-1 == mkdir(dir_ss.str())) {
-			return;
-		}
-		dir_iter++;
-		for(; dir_iter != p_dirs.end(); dir_iter++) {
-			dir_ss << p->split() << *dir_iter;
-			if(-1 == mkdir(dir_ss.str())) {
-				break;
+			} else {
+				if(-1 == mkdir(dir_ss.str())) {
+					TT_DEBUG << "cant mkdir " <<  strerror(errno);
+				}
 			}
 		}
+
+
+		
 	}
 
 
